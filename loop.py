@@ -5,8 +5,8 @@ class table:
             print(f"{n} * {i} = {n*i}")
             i+=1
 
-print("enter number:")
-num=int(input())
+
+num=int(input("enter number:"))
 print("")
 t=table()
 t.print_table(num)

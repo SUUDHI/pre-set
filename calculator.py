@@ -19,10 +19,10 @@ class calculator:
     def divide(self):#divide method
         return self.num1 / self.num2
 
-print("enter numbet 1")
-num1 = int(input())
-print("enter numbet 2")
-num2 = int(input())
+#taking input from user
+num1 = int(input("enter numbet 1"))
+)#taking input from user
+num2 = int(input("enter numbet 2"))
 
 cal = calculator(num1, num2)# object creation
 
