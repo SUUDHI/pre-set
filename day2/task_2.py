@@ -16,19 +16,21 @@ sentence = input("enter sentence: ")
 
 print(sentence)
 print("")
-
 print(sentence.upper()) #convert this into a uper case string
 print("")
 
+#counting words
+word_count = len(sentence.split())
+print(word_count)
+counter=sentence.count(" ")
+counter+=1
+print(counter)
 
+#reverse a string
 ns = sentence.split()
-print(ns)
-
 ns.reverse()
-print(ns)
-
 suu=' '.join(ns)
-print(suu)
+print(f"Reversed string : {suu}")
 
 
 
