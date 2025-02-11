@@ -21,3 +21,4 @@ elif age >= 18:
 
 else:
     print(f"Sorry {name}, you are not eligible to vote")
+    

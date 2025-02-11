@@ -46,5 +46,4 @@ if num_01 == rev:
     print(f"{num1} is an palindrome.")
 else:
     print(f"{num1} is not a palindrome.")
-
-    
+  

@@ -32,5 +32,3 @@ if passwd_len and low_check and up_check and dig_check:
 
 else:
     print("week password")
-
-

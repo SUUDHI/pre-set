@@ -31,6 +31,3 @@ ns = sentence.split()
 ns.reverse()
 suu=' '.join(ns)
 print(f"Reversed string : {suu}")
-
-
-
