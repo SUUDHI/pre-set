@@ -1,0 +1,7 @@
+t=open('sudhanshu.txt','w')
+t.write('Hello World \n hey it is my first file handling program')
+t.write('\n')
+t.write('sudhanhu is the owner of this file. \n checking nothing,it is just a samole file to check my learning')
+t.close()
+t=open('sudhanshu.txt','r')
+print(t.read())
