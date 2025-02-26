@@ -1,13 +1,13 @@
-num = int(input("Enter a number:"))
-if num < 0:
-    print("enter a positive integer")
+Enter_number= int(input("Enter a number:"))
 
+if Enter_number < 0:
+    print("enter a positive integer")
 else:
-    k=0
-    while (num > 0):
-        digit = num % 10
-        k += digit
-        num = num // 10
+    Count=0
+    while (Enter_number > 0):
+        digit = Enter_number % 10
+        Count += digit
+        Enter_number = Enter_number // 10
     
-print(f"Sum of digits:{k}")
+print(f"Sum of digits:{Count}")
         

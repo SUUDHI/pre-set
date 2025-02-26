@@ -1,29 +1,26 @@
-"""
-Questions on Conditional Statements (if-else)  
-1. Age Group Classifier  
-   - Take a person's age as input.  
-   - Print the corresponding category: Child (0-12 years), Teenager (13-19 years), 
-   Adult (20-59 years), Senior Citizen (60+ years).  
+# Define constants for better readability
+CHILD_AGE_MIN = 0
+CHILD_AGE_MAX = 12
+TEEN_AGE_MIN = 13
+TEEN_AGE_MAX = 19
+ADULT_AGE_MIN = 20
+ADULT_AGE_MAX = 59
+SENIOR_AGE_MIN = 60
+SENIOR_AGE_MAX = 120
 
-   Example Output:  
-   Enter your age: 25  
-   You are an Adult."""
-age = int(input("enter your age: "))
+# User Input
+age = int(input("Enter your age: "))
 
-if age ==0 and age <=12:
-    print("you are a chile")
-
-elif age >=13 and age <=19:
-    print("Teenager")
-
-elif age >=20 and age <=59:
-    print("adult")
-
-elif age >=60 and age <=120:
-    print("Senior Citizen")
-
-elif age <0:
-    print("age cant be negetive")
-
-
-
+# Age Classification
+if age < 0:
+    print("Age can't be negative.")
+elif CHILD_AGE_MIN <= age <= CHILD_AGE_MAX:
+    print("You are a child.")
+elif TEEN_AGE_MIN <= age <= TEEN_AGE_MAX:
+    print("You are a teenager.")
+elif ADULT_AGE_MIN <= age <= ADULT_AGE_MAX:
+    print("You are an adult.")
+elif SENIOR_AGE_MIN <= age <= SENIOR_AGE_MAX:
+    print("You are a senior citizen.")
+else:
+    print("Invalid age range.")  # Handles cases like age > 120

@@ -1,10 +1,3 @@
-"""Reverse a Number Without Using Strings  
-   - Take a number as input.  
-   - Reverse the number using a while loop (without converting it to a string).  
-
-   Example Output:  
-   Enter a number: 1234  
-   Reversed number: 4321"""
 num = int(input("Enter a number: "))
 
 reversed_num = 0
