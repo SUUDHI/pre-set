@@ -8,6 +8,5 @@ def character_frequency(s):
                 frequency[char] = 1
     return frequency
 
-# Example usage:
 input_string = "Sudhanshu Manutwal"
 print(character_frequency(input_string))

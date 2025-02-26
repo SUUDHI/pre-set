@@ -1,14 +1,23 @@
-"""
-You are given two sets of integers representing the favorite numbers of two friends.
-Write a program to:
-Find and print the common numbers they both like (Intersection).
-Find and print numbers that are unique to the first friend (Difference).
-Find and print numbers that are unique to the second friend (Difference).
-"""
-First_friend={12,17,18,20,22}
-Second_friend={12,18,19,20,14}
+First_friend={12,17,18,}
+Second_friend={12,18,16}
+common_numbers=[]#for storing common numbers
+unique_First=[]#for storing unique numbers of first friend
+unique_Second=[]#for storing unique numbers of second friend
 
-print(First_friend.intersection(Second_friend))
-print(First_friend.difference(Second_friend))
-print(Second_friend.difference(First_friend))
+#loop for finding common numbers
+for i in First_friend:
+    if i in Second_friend:
+        common_numbers.append(i)
+print(common_numbers)
 
+#loop for finding unique numbers of first friend
+for i in First_friend:
+    if i not in Second_friend:
+        unique_First.append(i)
+print(unique_First)
+
+#loop for finding unique numbers of second friend
+for i in Second_friend:
+    if i not in First_friend:
+        unique_Second.append(i)
+print(unique_Second)
