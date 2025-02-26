@@ -1,9 +1,3 @@
-"""
-methord i want to use but user press enter after entring first number
-num1,num2=input("enter two number with space:").split()
-print(num1)
-print(num2)
-"""
 num1=input("enter first number:")
 num2=input("enter second number:")
 #converting type
