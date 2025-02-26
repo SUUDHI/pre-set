@@ -1,5 +1,3 @@
-#Create a function that takes a tuple of three elements and returns them as separate variables.
-
 def num(k):#print 3 variables directly
     a,b,c=k
     print(a)
@@ -15,5 +13,3 @@ num(l1)
 
 x,y,z=num2(l1)#stoer the return value in x,y,z
 print(x,y,z)
-
-
