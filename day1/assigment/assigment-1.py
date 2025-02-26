@@ -1,7 +1,5 @@
-#this assigment one take input from user as a string and cinvert them into a correct formate and display it 
-
 Name = input("enter your name:")
-Age = int(input("enter your age:"))#iam taking age as an int input,it aslp can done with takind a extra varible like age2=int(age)
+Age = int(input("enter your age:"))
 Hobby= input("Enter your favorite hobby:")
 
 print("name",Name,"Type:",type(Name))

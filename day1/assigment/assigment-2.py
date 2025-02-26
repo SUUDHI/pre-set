@@ -7,22 +7,18 @@ print(num2)
 num1=input("enter first number:")
 num2=input("enter second number:")
 #converting type
-a=int(num1)
-b=int(num2)
+converted_num1=int(num1)
+converted_num2=int(num2)
 
-print(f"Sun of {a} and {b} is {a+b}")
-print(f"Difference of {a} and {b} is {a-b}")
-print(f"Product of {a} and {b} is {a*b}")
-print(f"Division of {a} and {b} is {a//b}")
+print(f"Sum of {converted_num1} and {converted_num2} is {converted_num1+converted_num2}")
+print(f"Difference of {converted_num1} and {converted_num2} is {converted_num1-converted_num2}")
+print(f"Product of {converted_num1} and {converted_num2} is {converted_num1*converted_num2}")
+print(f"Division of {converted_num1} and {converted_num2} is {converted_num1//converted_num2}")
 
 #converting in to float
-c=float(num1)
-d=float(num2)
-print(f"Sun of {c} and {d} is {c+d}")
-print(f"Difference of {c} and {d} is {c-d}")
-print(f"Product of {c} and {d} is {c*d}")
-print(f"Division of {c} and {d} is {c/d}")
-
-
-
-
+float_num1=float(num1)
+float_num2=float(num2)
+print(f"Sum of {float_num1} and {float_num2} is {float_num1+float_num2}")
+print(f"Difference of {float_num1} and {float_num2} is {float_num1-float_num2}")
+print(f"Product of {float_num1} and {float_num2} is {float_num1*float_num2}")
+print(f"Division of {float_num1} and {float_num2} is {float_num1/float_num2}")

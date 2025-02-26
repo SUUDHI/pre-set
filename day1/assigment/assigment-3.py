@@ -1,29 +1,19 @@
-""" String Length & ASCII Difference Challenge
-Take two string inputs.
-Compare their lengths and print which is longer.
-Calculate the ASCII difference between the first character of both strings.
-Example Output:
-Enter first string: Hello
-Enter second string: World
-Both strings have the same length: 5
-ASCII Difference (H - W): -15
-(Hint: Use  ord() to get ASCII values.)"""
-s = input("Enter first string:")
-u = input("Enter second string:")
+First_input = input("Enter first string:")
+Second_input = input("Enter second string:")
 
-len1=len(s)
-len2=len(u)
+len1=len(First_input)
+len2=len(Second_input)
 
 if len1 > len2:
-    print(f"{s} is greter then {u}")
+    print(f"{First_input} is greter then {Second_input}")
 
 elif len2 > len1 :
-    print(f"{u} is greter then {s}")
+    print(f"{Second_input} is greter then {First_input}")
 
 else:
-    print (f"{s} boyh are equal {u}")
+    print (f"{First_input} boyh are equal {Second_input}")
 
-first_diff = ord(s[0]) - ord(u[0])
-print(f"ASCII Difference ({s[0]} - {u[0]}): {first_diff}")
+first_diff = ord(First_input[0]) - ord(Second_input[0])
+print(f"ASCII Difference ({First_input[0]} - {Second_input[0]}): {first_diff}")
 
 
