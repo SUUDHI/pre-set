@@ -1,8 +1,9 @@
 import json
-emp='{"name":"sudhanshu","age":22,"city":"delhi"}'
-print(emp)
-print(type(emp))
 
-EMP1=json.loads(emp)#json.loads() method can be used to parse a valid JSON string and convert it into a Python Dictionary.
-print(EMP1)
-print(type(EMP1))
+with open("01_data.json","r") as file:
+    data = json.load(file)
+
+print(data)
+print(type(data))
+print("Name:", data["Emp"]["name"])
+print("Age:", data["Emp"]["age"])
