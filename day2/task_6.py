@@ -1,31 +1,13 @@
-"""
-2. Anagram Detector
-Write a program that:
-Takes two words as input.
-Checks if they are anagrams (contain the same letters but in different orders).
-Ignores case differences and spaces.
-Example Output:
-Enter first word: Listen  
-Enter second word: Silent  
-The words are anagrams.  
-OR
-Enter first word: Hello  
-Enter second word: World  
-The words are not anagrams.  
+Input_word_01 = input("Enter first word: ")
+Input_word_02 = input("Enter second word: ")
 
-"""
-word1 = input("Enter first word: ")
-word2 = input("Enter second word: ")
+Input_word_01 = Input_word_01.replace(" ", "")
+Input_word_02 = Input_word_02.replace(" ", "")
 
+Sorted_word_01=Input_word_01.lower()
+Sorted_word_02=Input_word_02.lower()
 
-word1 = word1.replace(" ", "")
-word2 = word2.replace(" ", "")
-
-s1=word1.lower()
-s2=word2.lower()
-
-
-if sorted(s1) == sorted(s2):
+if sorted(Sorted_word_01) == sorted(Sorted_word_02):
     print("The words are anagrams.")
 else:
     print("The words are not anagrams.")
