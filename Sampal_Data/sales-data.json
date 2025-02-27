@@ -1,0 +1,52 @@
+[
+    {
+        "Date": "2024-02-20",
+        "Product": "Laptop",
+        "Amount": "1200"
+    },
+    {
+        "Date": "2024-02-21",
+        "Product": "Phone",
+        "Amount": "800"
+    },
+    {
+        "Date": "2024-02-22",
+        "Product": "Headphones",
+        "Amount": "150"
+    },
+    {
+        "Date": "2024-02-23",
+        "Product": "Monitor",
+        "Amount": "300"
+    },
+    {
+        "Date": "2024-02-24",
+        "Product": "Keyboard",
+        "Amount": "100"
+    },
+    {
+        "Date": "2024-02-25",
+        "Product": "Mouse",
+        "Amount": "50"
+    },
+    {
+        "Date": "2024-02-26",
+        "Product": "Tablet",
+        "Amount": "600"
+    },
+    {
+        "Date": "2024-02-27",
+        "Product": "Smartwatch",
+        "Amount": "200"
+    },
+    {
+        "Date": "2024-02-28",
+        "Product": "Camera",
+        "Amount": "500"
+    },
+    {
+        "Date": "2024-02-29",
+        "Product": "Speakers",
+        "Amount": "250"
+    }
+]
