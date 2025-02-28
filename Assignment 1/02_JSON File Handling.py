@@ -1,29 +1,27 @@
 import json
 
-No_of_Employee = int(input("Enter Number of Employee you want to store data of: "))
+Emp_data = []
 
-#below code is performing write operation on the Emp-1.txt file
-with open (r"C:\cprogramming\GIt_demo\pre-set\Sampal_Data\EMP-1.txt", "a") as file:
-    for i in range(No_of_Employee):
-        file.write(input("Enter Employee ID: ") +", ")
-        file.write(input("Enter Employee Name: ") +", ")
-        file.write(input("Enter Employee Age: ") +", ")
-        file.write(input("Enter Employee Department: ")+"\n")
-
-#below code is performing read operation on the Emp-1.txt file        
-with open(r"C:\cprogramming\GIt_demo\pre-set\Sampal_Data\EMP-1.txt", "r") as file:
-    print(file.read())
-
-#below code is performing search operation on the basis of Employee ID
-with open(r"C:\cprogramming\GIt_demo\pre-set\Sampal_Data\EMP-1.txt", "r") as file:
-    search_id = input("Enter Employee ID to search: ")
+with open(r"C:\cprogramming\GIt_demo\pre-set\Sampal_Data\employees.txt", "r") as file:
     for line in file:
-        if search_id in line:
-            print(line)
-            break
-    else:
-        print("Employee ID not found")
+        # Strip newline and split by ", "
+        data = line.strip().split(", ")
 
+        # Ensure the line has exactly 4 values (ID, Name, Age, Department)
+        if len(data) == 4:
+            emp_dict = {
+                "ID": data[0],
+                "Name": data[1],
+                "Age": int(data[2]),  # Convert age to integer
+                "Department": data[3]
+            }
+            Emp_data.append(emp_dict)
 
+# Save data to a JSON file
+with open(r"C:\cprogramming\GIt_demo\pre-set\Sampal_Data\employees.json", "w") as json_file:
+    json.dump(Emp_data, json_file, indent=4)
 
-        
+print("Data successfully converted to JSON and saved as employees.json!")
+with open(r"C:\cprogramming\GIt_demo\pre-set\Sampal_Data\employees.json", "r") as json_file:
+    print(json_file.read())
+
