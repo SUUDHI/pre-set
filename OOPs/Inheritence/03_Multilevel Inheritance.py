@@ -18,5 +18,3 @@ print(student.school)
 student.subject="Maths"#changing the value of subject
 
 print(student.subject)
-
-

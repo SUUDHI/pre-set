@@ -14,6 +14,3 @@ s2=student("me",12,{"Math": 100, "Science": 60})
 s1.avg()
 s2.avg()
 print(s1._protected)
-
-
-
