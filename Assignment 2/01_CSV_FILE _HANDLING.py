@@ -25,7 +25,7 @@ total_sales = len(data)
 total_revenue = sum(row["Amount"] for row in data)
 
 # 3. Find Top 3 Highest Sales Transactions Without Using `sorted()`
-def selection_sort_desc(arr):
+def selection_sort(arr):
     """Sorts the list in descending order using Selection Sort."""
     n = len(arr)
     for i in range(n):
@@ -37,7 +37,7 @@ def selection_sort_desc(arr):
         arr[i], arr[max_idx] = arr[max_idx], arr[i]
 
 # Sort data using Selection Sort
-selection_sort_desc(data)
+selection_sort(data)
 
 # Get the top 3 highest sales
 top_sales = data[:3]
