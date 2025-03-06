@@ -1,0 +1,12 @@
+101, Alice, 30, HR
+102, Bob, 28, IT
+103, Charlie, 35, Finance
+104, David, 40, Marketing
+105, Emma, 25, Sales
+106, Frank, 32, Engineering
+107, Grace, 29, Customer Support
+108, Henry, 38, Product Management
+109, Isabella, 27, Design
+110, Jack, 45, Operations
+111,sudhanshu,22,cs
+112, ram, 33, hr
