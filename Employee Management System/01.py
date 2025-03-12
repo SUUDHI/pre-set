@@ -1,7 +1,7 @@
 import json
 import os
 
-Path=(r"C:\cprogramming\Employee Management System\01\employees.json")
+Path=(r"C:\cprogramming\GIt_demo\pre-set\Employee Management System\employees.json")
 
 class EmployeeModle:
     @staticmethod
@@ -73,7 +73,7 @@ class EmployeeController:
         new_employee = EmployeeModle(emp_id, name, age, department, salary, password)
         self.data.append(new_employee.to_dict())
         EmployeeModle.save_data(self.data)
-        EmployeeView.show_message(f"Employee added,your Id is{emp_id}")
+        EmployeeView.show_message(f"Employee added,your Id is {emp_id}")
 
     def authenticate_user(self, emp_id, password):
         for emp in self.data:
@@ -128,7 +128,7 @@ def main():
                 EmployeeView.show_message("Login Successfully!")
                 if emp_id == 1000:
                     while True:
-                        EmployeeView.show_message("Welcome Admin")
+                        EmployeeView.show_message("\nWelcome Admin")
                         EmployeeView.show_message("1.View all employee.")
                         EmployeeView.show_message("2.Remove a employee.")
                         EmployeeView.show_message("3.Logout.")
@@ -152,10 +152,8 @@ def main():
 
                     if Emp_choice == "1":
                         EmployeeView.show_employee_details(employee)
-
                     elif Emp_choice == "2":
                         controller.update_employee_details(employee)
-
                     elif Emp_choice == "3":
                         break
 
@@ -173,8 +171,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-   
-    
-        
-
-        
