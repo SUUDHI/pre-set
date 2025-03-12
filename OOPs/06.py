@@ -27,7 +27,7 @@ class C:
     def spek(self):
         print("in class C")
 
-class D(A, B, C):  # Multiple Inheritance
+class D(B,A,C):  # Multiple Inheritance
     pass
 
 obj = D()
