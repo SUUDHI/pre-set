@@ -1,0 +1,10 @@
+[
+    {
+        "emp_id": 1000,
+        "name": "Admin",
+        "age": "-",
+        "department": "Admin",
+        "salary": "-",
+        "password": "admin123"
+    }
+]
