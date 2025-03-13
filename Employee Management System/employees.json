@@ -6,5 +6,13 @@
         "department": "Admin",
         "salary": "-",
         "password": "admin123"
+    },
+    {
+        "emp_id": 1001,
+        "name": "raj",
+        "age": 18,
+        "department": "HR",
+        "salary": "20000",
+        "password": "1234"
     }
 ]

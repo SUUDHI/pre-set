@@ -65,7 +65,16 @@ class EmployeeController:
     def register_employee(self):
         emp_id = EmployeeModle.generate_emp_id()
         name = EmployeeView.get_input("Enter your Name:")
-        age = EmployeeView.get_input("Enter your Age:")
+        while True:
+            try:
+                age = int(EmployeeView.get_input("Enter your Age:"))
+                if age < 18:
+                    raise ValueError("Age must be greater than or equal to 18.")
+                break
+            except ValueError as e:
+                EmployeeView.show_message(f"Invalid input: {e}. Please enter a valid age.")
+
+
         department = EmployeeView.get_input("Enter your Department:")
         salary = EmployeeView.get_input("Enter your Salary:")
         password = EmployeeView.get_input("Enter A Strong Password:")
