@@ -9,10 +9,90 @@
     },
     {
         "emp_id": 1001,
-        "name": "raj",
-        "age": 18,
-        "department": "HR",
-        "salary": "20000",
+        "name": "sudhanshu",
+        "age": 20,
+        "department": "it",
+        "salary": "20",
         "password": "1234"
+    },
+    {
+        "emp_id": 1002,
+        "name": " ",
+        "age": " ",
+        "department": " ",
+        "salary": " ",
+        "password": ""
+    },
+    {
+        "emp_id": 1003,
+        "name": "sud",
+        "age": 19,
+        "department": "IT",
+        "salary": 200000.0,
+        "password": "1234"
+    },
+    {
+        "emp_id": 1004,
+        "name": "su",
+        "age": 20,
+        "department": " ",
+        "salary": 10.0,
+        "password": "1111"
+    },
+    {
+        "emp_id": 1005,
+        "name": "ss",
+        "age": 19,
+        "department": "ww",
+        "salary": 1.0,
+        "password": "ss"
+    },
+    {
+        "emp_id": 1006,
+        "name": "ss",
+        "age": 20,
+        "department": "ir",
+        "salary": 20.0,
+        "password": "qq"
+    },
+    {
+        "emp_id": 1007,
+        "name": "ss",
+        "age": 20,
+        "department": "ir",
+        "salary": 20.0,
+        "password": "& \"C:/Users/Sudhansu Manutwal/anaconda3/python.exe\" \"c:/cprogramming/GIt_demo/pre-set/Employee Management System/main.py\""
+    },
+    {
+        "emp_id": 1008,
+        "name": "ss",
+        "age": 20,
+        "department": "it",
+        "salary": 10.0,
+        "password": "Skmeena123@"
+    },
+    {
+        "emp_id": 1009,
+        "name": "2",
+        "age": 30,
+        "department": "0",
+        "salary": 30.0,
+        "password": "SKmeena121718"
+    },
+    {
+        "emp_id": 1010,
+        "name": "s",
+        "age": 111,
+        "department": "2",
+        "salary": 1.0,
+        "password": "SKmeena121"
+    },
+    {
+        "emp_id": 1011,
+        "name": "s",
+        "age": 20,
+        "department": "it",
+        "salary": 22.0,
+        "password": "Skmeena123"
     }
 ]

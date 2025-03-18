@@ -1,4 +1,4 @@
-class EmployeeView:
+class EmployeeDisplay:
     @staticmethod
     def show_message(message):
         print(message)

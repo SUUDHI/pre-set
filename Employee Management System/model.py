@@ -3,7 +3,7 @@ import os
 
 Path=(r"C:\cprogramming\GIt_demo\pre-set\Employee Management System\employees.json")
 
-class EmployeeModle:
+class EmployeeRecord:
     @staticmethod
     def load_data():
         if not os.path.exists(Path):
@@ -19,17 +19,25 @@ class EmployeeModle:
 
     @staticmethod
     def generate_emp_id():
-        data=EmployeeModle.load_data()
+        data=EmployeeRecord.load_data()
         return 1001 if not data else max(emp ["emp_id"] for emp in data)+1
     
-    def __init__(self,emp_id, name, age, department, salary, password):
-        self.emp_id = emp_id
+    @staticmethod
+    def authenticate_user(emp_id, password):
+        data = EmployeeRecord.load_data()
+        for emp in data:
+            if emp ["emp_id"] == emp_id and emp ["password"] == password:
+                return emp
+        return None
+   
+    def __init__(self, name, age, department, salary, password):
+        self.emp_id = self.generate_emp_id()
         self.name = name
         self.age = age
         self.department = department
         self.salary = salary
         self.password = password
-    
+
     def to_dict(self):
         return {
             "emp_id": self.emp_id,
