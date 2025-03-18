@@ -26,7 +26,7 @@ class EmployeeManager:
         #using while true with exception handling for Salary
         while True:
             try:
-                salary = float(EmployeeDisplay.get_input("Enter your Salary:"))
+                salary = int(EmployeeDisplay.get_input("Enter your Salary:"))
                 if salary <= 0:
                     EmployeeDisplay.show_message("Salary must be a positive number or Grater then 0. Please try again.")
                     continue
@@ -54,7 +54,7 @@ class EmployeeManager:
             if passwd_len and Lower_case_check and Upper_case_check and digit_check:
                 break
             else:
-                EmployeeDisplay.show_message("week enter stronge password")
+                EmployeeDisplay.show_message("Week, enter stronge password")
         #convert user input to a dict, so 
         employee_data = {
                         "name": name,
@@ -102,7 +102,7 @@ class EmployeeManager:
                     emp["department"] = department
 
                 salary = EmployeeDisplay.get_input("Enter Salary:").strip()
-                if salary.isdigit() and float(salary) > 0:
+                if salary.isdigit() and int(salary) > 0:
                     emp["salary"] = salary
 
                 EmployeeRecord.save_data(self.data)
