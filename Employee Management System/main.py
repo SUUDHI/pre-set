@@ -20,11 +20,14 @@ def main():
             continue
 
         if choice == 1:
-                
-            emp_id = int(EmployeeDisplay.get_input("Enter Employee Id:"))
-            password=EmployeeDisplay.get_input("Enter your password:")
-            employee = EmployeeRecord.authenticate_user(emp_id, password)
-
+            try:    
+                emp_id = int(EmployeeDisplay.get_input("Enter Employee Id:"))
+                password=EmployeeDisplay.get_input("Enter your password:")
+                employee = EmployeeRecord.authenticate_user(emp_id, password)
+            except ValueError:
+                EmployeeDisplay.show_message("Enter ID or Password, It can't be empty. ")
+                continue
+            
             if employee:
                 EmployeeDisplay.show_message("Login Successfully!")
                 if emp_id == Admin_Id:
