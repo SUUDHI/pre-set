@@ -81,7 +81,7 @@ def main():
                             EmployeeDisplay.show_message("Invalid choice! Please enter 1, 2, or 3.")
 
             else:
-                EmployeeDisplay.show_message("Invilid ID")
+                EmployeeDisplay.show_message("Invilid ID 0r Password")
         elif choice == 2:
             controller.register_employee()
         
