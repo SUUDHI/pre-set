@@ -2,8 +2,6 @@ import json
 import os
 from  constant import *
 
-
-
 class EmployeeRecord:
     @staticmethod
     def load_data():
@@ -26,7 +24,7 @@ class EmployeeRecord:
         if not any(emp["emp_id"] == ADMIN_ID for emp in data):
             data.append(ADMIN_DETAILS)
             EmployeeRecord.save_data(data)
-
+            
         return data
          
     @staticmethod

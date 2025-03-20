@@ -50,9 +50,25 @@ def Input_password():
 
 @staticmethod
 def Update_salary():
-     while True:
-        salary = EmployeeDisplay.get_input("Enter Salary:").strip()
+    salary = EmployeeDisplay.get_input("Enter Salary:").strip()
+    if salary:
         if salary.isdigit() and int(salary) > 0:
             return int(salary)
-        else:
-            EmployeeDisplay.show_message("Invalid salary! Please enter a positive number.")
+
+@staticmethod
+def Update_age():
+    age = EmployeeDisplay.get_input("Enter age:").strip()
+    if age:
+        if age.isdigit() and int(age) >= 18:
+            return int(age)
+@staticmethod
+def Update_department():
+    department = EmployeeDisplay.get_input("Enter Department:").strip()
+    if department:
+        return department
+
+@staticmethod
+def Update_name():
+    name = EmployeeDisplay.get_input("Enter Name:").strip()
+    if name:
+        return name

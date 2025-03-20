@@ -10,9 +10,9 @@
     {
         "emp_id": 1001,
         "name": "sudhanshu",
-        "age": 30,
-        "department": "Hr",
-        "salary": 2000,
-        "password": "Raj123456"
+        "age": 33,
+        "department": "cs",
+        "salary": 12,
+        "password": "As12345678"
     }
 ]

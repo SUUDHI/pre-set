@@ -1,8 +1,8 @@
 ADMIN_ID = 1000
 
-PATH=(r"C:\cprogramming\GIt_demo\pre-set\Employee Management System\employees.json")
+PATH = (r"C:\cprogramming\GIt_demo\pre-set\Employee Management System\employees.json")
 
-ADMIN_DETAILS={
+ADMIN_DETAILS = {
                 "emp_id": ADMIN_ID,
                 "name": "admin",
                 "age": 22,

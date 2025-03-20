@@ -9,7 +9,7 @@ class EmployeeManager:
 
     def register_employee(self):
         name = EmployeeDisplay.get_input("Enter your Name:")
-        age= age_Validation()
+        age = age_Validation()
         department = EmployeeDisplay.get_input("Enter your Department:")
         salary = Input_salary()
         password = Input_password()
@@ -26,35 +26,31 @@ class EmployeeManager:
     def delete_employee(self,emp_id):
         if emp_id == ADMIN_ID:
             EmployeeDisplay.show_message("Admin can't be delete from database")
-            return
-        
-        for employee, emp in enumerate(self.data): 
-            if emp["emp_id"] == emp_id:
-                del self.data[employee]  
-                EmployeeRecord.save_data(self.data)
-                EmployeeDisplay.show_message("Employee deleted from database.")
-                return 
-                 
-    EmployeeDisplay.show_message("Employee ID not found in database.")
+        else:
+            for emp in self.data: 
+                if emp["emp_id"] == emp_id:
+                    self.data.remove(emp) 
+                    EmployeeRecord.save_data(self.data)
+                    EmployeeDisplay.show_message("Employee deleted from database.") 
+                    
+            EmployeeDisplay.show_message("Employee ID not found in database.")
    
     def update_employee_details(self, employee):
         for emp in self.data:
             if emp["emp_id"] == employee["emp_id"]:
-                name = EmployeeDisplay.get_input("Enter Name:").strip()
-                if name:
-                    emp["name"] = name
-
-                age = EmployeeDisplay.get_input("Enter age:").strip()
-                if age:
-                    if age.isdigit() and int(age) >= 18:
-                        emp["age"] = int(age)
+                name= Update_name()
+                emp["name"] = name
                 
-                department = EmployeeDisplay.get_input("Enter Department:").strip()
-                if department:
-                    emp["department"] = department
+                age = Update_age()
+                emp["age"] = age
 
-                salary = Update_salary()
-                
+                department = Update_department()
+                emp["department"] = department
+
+                new_salary = Update_salary()
+                if new_salary is not None:  
+                    emp["salary"] = new_salary 
+
                 EmployeeRecord.save_data(self.data)
                 EmployeeDisplay.show_message("Details Updated!")
                 return

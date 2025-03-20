@@ -14,9 +14,7 @@ def main():
         EmployeeDisplay.show_message("3.Exit")
 
         try:
-            choice = int(
-                EmployeeDisplay.get_input("Enter your choice:")
-                )
+            choice = int(EmployeeDisplay.get_input("Enter your choice:"))
             
         except ValueError:
             EmployeeDisplay.show_message("Invalid input! Please enter a number (1, 2, or 3).")
@@ -25,7 +23,7 @@ def main():
         if choice == 1:
             try:    
                 emp_id = int(EmployeeDisplay.get_input("Enter Employee Id:"))
-                password=EmployeeDisplay.get_input("Enter your password:")
+                password = EmployeeDisplay.get_input("Enter your password:")
                 employee = EmployeeRecord.authenticate_user(emp_id, password)
             except ValueError:
                 EmployeeDisplay.show_message("Enter ID or Password, It can't be empty. ")
@@ -41,9 +39,7 @@ def main():
                         EmployeeDisplay.show_message("3.Logout.")
 
                         try:
-                            Admin_choice =int(
-                                EmployeeDisplay.get_input("Enter Choice:")
-                                )
+                            Admin_choice = int(EmployeeDisplay.get_input("Enter Choice:"))
                         except ValueError:
                             EmployeeDisplay.show_message("Invalid input! Please enter a number (1, 2, or 3).")
                             continue
@@ -52,9 +48,7 @@ def main():
                             controller.view_all_employee()
                         elif Admin_choice == 2:
                             try:
-                                emp_id = int(
-                                    EmployeeDisplay.get_input("Enter Employee ID to delete: ")
-                                    )
+                                emp_id = int(EmployeeDisplay.get_input("Enter Employee ID to delete: "))
                                 controller.delete_employee(emp_id)
                             except ValueError:
                                 EmployeeDisplay.show_message("Invalid input! Employee ID must be a number.")
