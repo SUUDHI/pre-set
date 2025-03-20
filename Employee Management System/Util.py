@@ -25,7 +25,7 @@ def Input_salary():
             EmployeeDisplay.show_message("Invalid input. Please enter a numeric salary value.")
 
 @staticmethod
-def Input_Password():
+def Input_password():
      while True:
             EmployeeDisplay.show_message("At least 8 characters long,\n Contains both uppercase and lowercase letters,\n Includes at least one number")
             password = EmployeeDisplay.get_input("Enter Password:")
@@ -33,7 +33,7 @@ def Input_Password():
             passwd_len = len(password) >= 8
             Lower_case_check = False
             Upper_case_check = False
-            digit_check = False
+            Digit_check = False
 
             for char in password:
                 if 'A'<= char <= 'Z':
@@ -41,10 +41,18 @@ def Input_Password():
                 if 'a'<= char <= 'z':
                     Lower_case_check = True
                 if '0' <= char <= '9':
-                    digit_check = True
+                    Digit_check = True
 
-            if passwd_len and Lower_case_check and Upper_case_check and digit_check:
+            if passwd_len and Lower_case_check and Upper_case_check and Digit_check:
                 return password
             else:
-                EmployeeDisplay.show_message("Week, enter stronge password")
-            
+                EmployeeDisplay.show_message("Weak, enter a strong password.")
+
+@staticmethod
+def Update_salary():
+     while True:
+        salary = EmployeeDisplay.get_input("Enter Salary:").strip()
+        if salary.isdigit() and int(salary) > 0:
+            return int(salary)
+        else:
+            EmployeeDisplay.show_message("Invalid salary! Please enter a positive number.")

@@ -1,7 +1,7 @@
 from controller import EmployeeManager
 from view import EmployeeDisplay
 from model import EmployeeRecord
-from constant import Admin_Id
+from constant import ADMIN_ID
 
 #main fun
 def main():
@@ -14,7 +14,9 @@ def main():
         EmployeeDisplay.show_message("3.Exit")
 
         try:
-            choice = int(EmployeeDisplay.get_input("Enter your choice:"))
+            choice = int(
+                EmployeeDisplay.get_input("Enter your choice:")
+                )
             
         except ValueError:
             EmployeeDisplay.show_message("Invalid input! Please enter a number (1, 2, or 3).")
@@ -31,7 +33,7 @@ def main():
             
             if employee:
                 EmployeeDisplay.show_message("Login Successfully!")
-                if emp_id == Admin_Id:
+                if emp_id == ADMIN_ID:
                     while True:
                         EmployeeDisplay.show_message("\nWelcome Admin")
                         EmployeeDisplay.show_message("1.View all employee.")
@@ -39,7 +41,9 @@ def main():
                         EmployeeDisplay.show_message("3.Logout.")
 
                         try:
-                            Admin_choice =int(EmployeeDisplay.get_input("Enter Choice:"))
+                            Admin_choice =int(
+                                EmployeeDisplay.get_input("Enter Choice:")
+                                )
                         except ValueError:
                             EmployeeDisplay.show_message("Invalid input! Please enter a number (1, 2, or 3).")
                             continue
@@ -48,7 +52,9 @@ def main():
                             controller.view_all_employee()
                         elif Admin_choice == 2:
                             try:
-                                emp_id = int(EmployeeDisplay.get_input("Enter Employee ID to delete: "))
+                                emp_id = int(
+                                    EmployeeDisplay.get_input("Enter Employee ID to delete: ")
+                                    )
                                 controller.delete_employee(emp_id)
                             except ValueError:
                                 EmployeeDisplay.show_message("Invalid input! Employee ID must be a number.")
@@ -65,7 +71,9 @@ def main():
                         EmployeeDisplay.show_message("3.Logout.")
 
                         try:
-                            Emp_choice = int(EmployeeDisplay.get_input("Enter your Choice"))
+                            Emp_choice = int(
+                                EmployeeDisplay.get_input("Enter your Choice:")
+                                )
                         except ValueError:
                             EmployeeDisplay.show_message("Invalid choice. Please enter 1, 2, or 3") 
                             continue   
