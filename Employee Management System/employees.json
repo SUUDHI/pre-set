@@ -1,18 +1,18 @@
 [
     {
-        "emp_id": 1001,
-        "name": "ss",
-        "age": 22,
-        "department": "ss",
-        "salary": 22,
-        "password": "Ss12345678"
-    },
-    {
         "emp_id": 1000,
         "name": "admin",
         "age": 22,
         "department": "IT",
         "salary": 100,
         "password": "Admin1234"
+    },
+    {
+        "emp_id": 1001,
+        "name": "Raj ji",
+        "age": 22,
+        "department": "Operation",
+        "salary": "30000",
+        "password": "Rajji1234"
     }
 ]
