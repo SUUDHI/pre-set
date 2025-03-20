@@ -3,7 +3,6 @@ from view import EmployeeDisplay
 from model import EmployeeRecord
 from constant import Admin_Id
 
-
 #main fun
 def main():
     controller = EmployeeManager()
@@ -15,7 +14,6 @@ def main():
         EmployeeDisplay.show_message("3.Exit")
 
         try:
-
             choice = int(EmployeeDisplay.get_input("Enter your choice:"))
         except ValueError:
             EmployeeDisplay.show_message("Invalid input! Please enter a number (1, 2, or 3).")

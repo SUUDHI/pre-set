@@ -1,17 +1,34 @@
 import json
 import os
+from  constant import Admin_details , Admin_Id
 
 Path=(r"C:\cprogramming\GIt_demo\pre-set\Employee Management System\employees.json")
 
 class EmployeeRecord:
     @staticmethod
     def load_data():
+        data = [Admin_details] # Initialize with admin
+
+        # If file does not exist, create it with admin details
         if not os.path.exists(Path):
             with open(Path, "w") as file:
-                json.dump([], file)
-        with open(Path, "r") as file:
-            return json.load(file)
-    
+                json.dump([Admin_details], file, indent=4)
+        else:
+            # Load existing data
+            with open(Path, "r") as file:
+                try:
+                    data = json.load(file)
+                except json.JSONDecodeError:  # Handling corrupted JSON
+                    data = [Admin_details]  
+                    EmployeeRecord.save_data(data)
+
+        # Ensure Admin is always present
+        if not any(emp["emp_id"] == Admin_Id for emp in data):
+            data.append(Admin_details)
+            EmployeeRecord.save_data(data)
+
+        return data
+         
     @staticmethod
     def save_data(data):
         with open(Path,"w") as file:
