@@ -15,6 +15,7 @@ def main():
 
         try:
             choice = int(EmployeeDisplay.get_input("Enter your choice:"))
+            
         except ValueError:
             EmployeeDisplay.show_message("Invalid input! Please enter a number (1, 2, or 3).")
             continue
@@ -53,6 +54,8 @@ def main():
                                 EmployeeDisplay.show_message("Invalid input! Employee ID must be a number.")
                         elif Admin_choice == 3:
                             break
+                        else:
+                            EmployeeDisplay.show_message("Invalid choice! Please enter 1, 2, or 3.")
                 
                 else:
                     while True:
@@ -72,6 +75,8 @@ def main():
                             controller.update_employee_details(employee)
                         elif Emp_choice == 3:
                             break
+                        else:
+                            EmployeeDisplay.show_message("Invalid choice! Please enter 1, 2, or 3.")
 
             else:
                 EmployeeDisplay.show_message("Invilid ID")
@@ -81,6 +86,8 @@ def main():
         elif choice == 3:
             EmployeeDisplay.show_message("Exiting the system.")
             break
+        else:
+            EmployeeDisplay.show_message("Invalid choice! Please enter 1, 2, or 3.")
         
 if __name__ == "__main__":
     main()
