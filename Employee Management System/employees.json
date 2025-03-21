@@ -1,0 +1,18 @@
+[
+    {
+        "emp_id": 1000,
+        "name": "admin",
+        "age": 22,
+        "department": "IT",
+        "salary": 100,
+        "password": "Admin1234"
+    },
+    {
+        "emp_id": 1001,
+        "name": "sudhanshu",
+        "age": 33,
+        "department": "cs",
+        "salary": 12,
+        "password": "As12345678"
+    }
+]
