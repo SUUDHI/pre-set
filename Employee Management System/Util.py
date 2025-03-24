@@ -1,6 +1,15 @@
 from view import *
 
 @staticmethod
+def name_input():
+    while True:
+        name = EmployeeDisplay.get_input("Enter your Name:")
+        if name.isdigit():
+            EmployeeDisplay.show_message("Please input Character  Only!")
+            continue
+        return name
+    
+@staticmethod
 def age_Validation():
     while True:  
             try:
@@ -70,7 +79,10 @@ def Update_department():
 @staticmethod
 def Update_name():
     name = EmployeeDisplay.get_input("Enter Name:").strip()
-    if name:
+    if name.isdigit():
+        EmployeeDisplay.show_message("please Enter Character Only.")
+        return None
+    elif name:
         return name
 
 @staticmethod

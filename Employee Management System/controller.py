@@ -6,7 +6,7 @@ from modle_01 import Employe_r
 
 class EmployeeManager:
     def register_employee(self):
-        name = EmployeeDisplay.get_input("Enter your Name:")
+        name = name_input()
         age = age_Validation()
         department = EmployeeDisplay.get_input("Enter your Department:")
         salary = Input_salary()
