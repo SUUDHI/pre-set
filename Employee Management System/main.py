@@ -1,11 +1,12 @@
 
 from view import EmployeeDisplay
 from modle_01 import EmployeeRecord
-from controller import EmployeeManager
+from controller import EmployeeManager , AdminManager 
 from constant import ADMIN_ID , INVALID_CHOICE
 
 def main():
     controller = EmployeeManager()
+    admin_controller = AdminManager()
 
     while True:
         EmployeeDisplay.show_message("     WELCOME     ")
@@ -45,11 +46,11 @@ def main():
                             continue
 
                         if Admin_choice == 1:
-                            controller.view_all_employee()
+                            admin_controller.view_all_employee()
                         elif Admin_choice == 2:
                             try:
                                 emp_id = int(EmployeeDisplay.get_input("Enter Employee ID to delete: "))
-                                controller.delete_employee(emp_id)
+                                admin_controller.delete_employee(emp_id)
                             except ValueError:
                                 EmployeeDisplay.show_message("Invalid input! Employee ID must be a number.")
                         elif Admin_choice == 3:
