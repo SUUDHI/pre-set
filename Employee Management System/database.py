@@ -4,7 +4,7 @@ def connect_db():
     return sqlite3.connect("Emp.DB")
 
 def initialize_database():
-    connect = connect_db()
+    connect =connect_db()
     cursor = connect.cursor()
 
     cursor.execute("""
@@ -30,7 +30,4 @@ def initialize_database():
 
     connect.close()
 
-#
 initialize_database()
-
-

@@ -1,10 +1,10 @@
 import sqlite3
-from connect import * 
+from database import initialize_database 
 from view import EmployeeDisplay 
 
-class Employe_r:
+class EmployeeRecord:
     def __init__(self, name, age, department, salary, password):
-        self.emp_id = Employe_r.generate_emp_id()
+        self.emp_id = EmployeeRecord.generate_emp_id()
         self.name = name
         self.age = age
         self.department = department
@@ -13,12 +13,12 @@ class Employe_r:
 
 
     @staticmethod
-    def Connect_db():
+    def connect_db():
         return sqlite3.connect("EMP.DB")
 
     @staticmethod
     def save_employee(name, age, department, salary, password):
-        connect = Employe_r.Connect_db()
+        connect = EmployeeRecord.connect_db()
         cursor = connect.cursor()
         cursor.execute("""
                     INSERT INTO Employee(name, age, department, salary, password)
@@ -31,11 +31,10 @@ class Employe_r:
         connect.close()
 
         return new_emp_id
-        #EmployeeDisplay.show_message("Employee add successfully!")
-
+    
     @staticmethod
-    def Load_all_employee():
-        connect = Employe_r.Connect_db()
+    def load_all_employee():
+        connect = EmployeeRecord.connect_db()
         cursor = connect.cursor()
         cursor.execute(" SELECT * FROM Employee")
         employees = cursor.fetchall()
@@ -43,8 +42,8 @@ class Employe_r:
         return employees
 
     @staticmethod
-    def Authenticate_user(emp_id, password):
-        connect = Employe_r.Connect_db()
+    def authenticate_user(emp_id, password):
+        connect = EmployeeRecord.connect_db()
         cursor = connect.cursor()
         cursor.execute("SELECT * FROM Employee WHERE emp_id = ? AND password = ?", (emp_id, password))
         user = cursor.fetchone()
@@ -54,7 +53,7 @@ class Employe_r:
     @staticmethod
     def generate_emp_id():
         #Fetch the next available employee ID, starting from 1001.
-        connect = Employe_r.connect_db()
+        connect = EmployeeRecord.connect_db()
         cursor = connect.cursor()
 
         cursor.execute("SELECT MAX(emp_id) FROM Employee WHERE emp_id >= 1001")

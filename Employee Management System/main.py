@@ -1,9 +1,9 @@
-from controller import EmployeeManager
-from view import EmployeeDisplay
-from modle_01 import Employe_r
-from constant import ADMIN_ID
 
-#main fun
+from view import EmployeeDisplay
+from modle_01 import EmployeeRecord
+from controller import EmployeeManager
+from constant import ADMIN_ID , INVALID_CHOICE
+
 def main():
     controller = EmployeeManager()
 
@@ -17,14 +17,14 @@ def main():
             choice = int(EmployeeDisplay.get_input("Enter your choice:"))
             
         except ValueError:
-            EmployeeDisplay.show_message("Invalid input! Please enter a number (1, 2, or 3).")
+            EmployeeDisplay.show_message(INVALID_CHOICE)
             continue
 
         if choice == 1:
             try:    
                 emp_id = int(EmployeeDisplay.get_input("Enter Employee Id:"))
                 password = EmployeeDisplay.get_input("Enter your password:")
-                employee = Employe_r.Authenticate_user(emp_id, password)
+                employee = EmployeeRecord.authenticate_user(emp_id, password)
             except ValueError:
                 EmployeeDisplay.show_message("Enter ID or Password, It can't be empty. ")
                 continue
@@ -41,7 +41,7 @@ def main():
                         try:
                             Admin_choice = int(EmployeeDisplay.get_input("Enter Choice:"))
                         except ValueError:
-                            EmployeeDisplay.show_message("Invalid input! Please enter a number (1, 2, or 3).")
+                            EmployeeDisplay.show_message(INVALID_CHOICE)
                             continue
 
                         if Admin_choice == 1:
@@ -55,7 +55,7 @@ def main():
                         elif Admin_choice == 3:
                             break
                         else:
-                            EmployeeDisplay.show_message("Invalid choice! Please enter 1, 2, or 3.")
+                            EmployeeDisplay.show_message(INVALID_CHOICE)
                 
                 else:
                     while True:
@@ -69,7 +69,7 @@ def main():
                                 EmployeeDisplay.get_input("Enter your Choice:")
                                 )
                         except ValueError:
-                            EmployeeDisplay.show_message("Invalid choice. Please enter 1, 2, or 3") 
+                            EmployeeDisplay.show_message(INVALID_CHOICE) 
                             continue   
                         if Emp_choice == 1:
                             EmployeeDisplay.show_employee_details(employee)
@@ -78,10 +78,10 @@ def main():
                         elif Emp_choice == 3:
                             break
                         else:
-                            EmployeeDisplay.show_message("Invalid choice! Please enter 1, 2, or 3.")
+                            EmployeeDisplay.show_message(INVALID_CHOICE)
 
             else:
-                EmployeeDisplay.show_message("Invilid ID 0r Password")
+                EmployeeDisplay.show_message("Invilid ID Or Password")
         elif choice == 2:
             controller.register_employee()
         
@@ -89,7 +89,7 @@ def main():
             EmployeeDisplay.show_message("Exiting the system.")
             break
         else:
-            EmployeeDisplay.show_message("Invalid choice! Please enter 1, 2, or 3.")
+            EmployeeDisplay.show_message(INVALID_CHOICE)
         
 if __name__ == "__main__":
     main()

@@ -1,26 +1,25 @@
-#from model import EmployeeRecord
 from view import EmployeeDisplay
 from constant import ADMIN_ID
-from Util import *
-from modle_01 import Employe_r
+from Util import Utility
+from modle_01 import EmployeeRecord
 
 class EmployeeManager:
     def register_employee(self):
-        name = name_input()
-        age = age_Validation()
+        name = Utility.input_name()
+        age = Utility.input_age()
         department = EmployeeDisplay.get_input("Enter your Department:")
-        salary = Input_salary()
-        password = Input_password()
+        salary = Utility.input_salary()
+        password = Utility.input_password()
 
-        connect = Employe_r.Connect_db()
+        connect = EmployeeRecord.connect_db()
         cursor = connect.cursor()
 
-        new_emp_id = Employe_r.save_employee(name, age, department, salary, password)
+        new_emp_id = EmployeeRecord.save_employee(name, age, department, salary, password)
         EmployeeDisplay.show_message(f"Employee added, your ID is {new_emp_id}")
 
     #admin only
     def view_all_employee(self):
-        employees = Employe_r.Load_all_employee()
+        employees = EmployeeRecord.load_all_employee()
         for emp in employees:
             EmployeeDisplay.show_message(f"ID: {emp[0]}, Name: {emp[1]}, Age: {emp[2]}, Dept: {emp[3]}, Salary: {emp[4]}")
         
@@ -28,7 +27,7 @@ class EmployeeManager:
         if emp_id == ADMIN_ID:
             EmployeeDisplay.show_message("Admin can't be delete from database")
         else:
-            connect = Employe_r.Connect_db()
+            connect = EmployeeRecord.connect_db()
             cursor = connect.cursor()
             cursor.execute("DELETE FROM Employee WHERE emp_id = ?",(emp_id,))  
             connect.commit()
@@ -36,14 +35,14 @@ class EmployeeManager:
 
    
     def update_employee_details(self, emp_id):
-            connect = Employe_r.Connect_db()
+            connect = EmployeeRecord.connect_db()
             cursor = connect.cursor()
 
-            new_name = Update_name()
-            new_age = Update_age()
-            new_department = Update_department()
-            new_salary = Update_salary()
-            new_password = Update_password()
+            new_name = Utility.update_name()
+            new_age = Utility.update_age()
+            new_department = Utility.update_department()
+            new_salary = Utility.update_salary()
+            new_password = Utility.update_password()
 
             cursor.execute("""
                 UPDATE Employee 
@@ -58,4 +57,4 @@ class EmployeeManager:
             connect.commit()
             connect.close()
             EmployeeDisplay.show_message("Details Updated!")
-            return
+            
