@@ -5,9 +5,7 @@ import sqlite3
 class UserService:
     def register_user(self, data):
         conn = None
-        """
-        Registers a new user in the system.
-        """
+        
         try:
             conn = DatabaseConnector.get_connection()
             cursor = conn.cursor()

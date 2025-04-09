@@ -6,9 +6,7 @@ import sqlite3
 
 class RideService:
     def request_ride(self, data):
-        """
-        Inserts a new ride request into the database.
-        """
+       
         try:
             conn = DatabaseConnector.get_connection()
             cursor = conn.cursor()

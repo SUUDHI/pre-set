@@ -1,7 +1,7 @@
 import sqlite3
 
 class DatabaseConnector:
-    DB_PATH = "taxi_booking.db"  # Ensure this path exists and is correct
+    DB_PATH = "taxi_booking.db" 
 
     @classmethod
     def get_connection(cls):

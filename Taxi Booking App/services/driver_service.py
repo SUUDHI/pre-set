@@ -4,9 +4,7 @@ import sqlite3
 
 class DriverService:
     def register_driver(self, data):
-        """
-        Registers a new driver in the system.
-        """
+        
         try:
             conn = DatabaseConnector.get_connection()
             cursor = conn.cursor()

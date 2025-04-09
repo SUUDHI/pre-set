@@ -85,4 +85,4 @@ if __name__ == "__main__":
     initializer = DatabaseInitializer()
     initializer.create_tables()
     initializer.close()
-    print("✅ Database initialized successfully!")
+    print("Database initialized successfully!")
