@@ -19,3 +19,12 @@ def register_driver():
 
     response, status = driver_service.register_driver(data)
     return jsonify(response), status
+
+@driver_bp.route("/login", methods=["POST"])
+def login_driver():
+    data = request.get_json()
+    email = data.get("email")
+    password = data.get("password")
+
+    response, status = driver_service.login_driver(email, password)
+    return jsonify(response), status

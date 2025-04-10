@@ -1,4 +1,5 @@
 from db.connect_db import DatabaseConnector
+from utils.jwt_handler import generate_token
 import sqlite3
 
 
@@ -30,3 +31,18 @@ class DriverService:
         finally:
             if conn:
                 conn.close()
+
+    def login_driver(self, email, password):
+            conn = DatabaseConnector.get_connection()
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT * FROM Drivers WHERE Driver_email = ? AND Password = ?", (email, password))
+            driver = cursor.fetchone()
+
+            if driver:
+                token = generate_token({"driver_id": driver["DriverID"], "role": "driver"})
+                return {"token": token}, 200
+            else:
+                return {"error": "Invalid credentials"}, 401
+

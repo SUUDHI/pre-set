@@ -35,9 +35,7 @@ class RideService:
                 conn.close()
 
     def get_ride_status(self, ride_id):
-        """
-        Retrieves ride status by RideID.
-        """
+        
         try:
             conn = DatabaseConnector.get_connection()
             cursor = conn.cursor()
@@ -82,6 +80,15 @@ class RideService:
 
             cursor.execute("SELECT PickupLatitude, PickupLongitude, DropoffLatitude, DropoffLongitude FROM Rides WHERE RideID = ?", (ride_id,))
             ride = cursor.fetchone()
+            if not ride:
+                return {"error": "Ride not found"}, 404
+
+            if (
+                ride["PickupLatitude"] is None or ride["PickupLongitude"] is None or
+                ride["DropoffLatitude"] is None or ride["DropoffLongitude"] is None
+            ):
+                return {"error": "Ride pickup or dropoff coordinates are missing"}, 400
+
 
             fare = calculate_fare(
                 ride["PickupLatitude"], ride["PickupLongitude"],

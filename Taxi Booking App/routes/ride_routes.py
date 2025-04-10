@@ -1,12 +1,14 @@
 from flask import Blueprint, request, jsonify
 from services.ride_service import RideService
 from utils.validators import validate_ride_data
+from utils.jwt_utils import token_required
 
 ride_bp = Blueprint("ride", __name__)
 ride_service = RideService()
 
 
 @ride_bp.route("/request", methods=["POST"])
+@token_required(role="user")  # ✅ only users can request rides
 def request_ride():
     data = request.get_json()
     if not data:
@@ -28,6 +30,7 @@ def ride_status(ride_id):
 
 
 @ride_bp.route("/assign_driver", methods=["POST"])
+@token_required(role="driver")
 def assign_driver():
     data = request.get_json()
     required = ["ride_id", "pickup_lat", "pickup_lng"]
