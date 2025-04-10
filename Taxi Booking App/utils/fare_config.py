@@ -1,0 +1,2 @@
+BASE_FARE = 50
+RATE_PER_KM = 15

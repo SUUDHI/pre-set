@@ -3,6 +3,7 @@ from routes.auth_routes import auth_bp
 from routes.driver_routes import driver_bp
 from routes.ride_routes import ride_bp
 from utils.config import SECRET_KEY
+
 class TaxiApp:
     def __init__(self):
         self.app = Flask(__name__, template_folder="templates")
@@ -19,14 +20,6 @@ class TaxiApp:
         @self.app.route("/")
         def home():
             return render_template("index.html")
-
-        @self.app.route("/register_user")
-        def register_page():
-            return render_template("register.html")
-
-        @self.app.route("/register_driver")
-        def register_driver_page():
-            return render_template("register_driver.html")
 
     def run(self):
         self.app.run(debug=True)

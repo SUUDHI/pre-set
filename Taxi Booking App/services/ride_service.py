@@ -1,85 +1,49 @@
-from db.connect_db import DatabaseConnector
+from utils.coordinate import Coordinate
 from utils.distance import calculate_distance
 from utils.fare import calculate_fare
+from db_operations import ride_ops
 import sqlite3
-
 
 class RideService:
     def request_ride(self, data):
-       
         try:
-            conn = DatabaseConnector.get_connection()
-            cursor = conn.cursor()
-
-            cursor.execute(
-                """INSERT INTO Rides (
-                    UserID, Pickup_Location, Dropoff_Location, 
-                    PickupLatitude, PickupLongitude, DropoffLatitude, DropoffLongitude
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                (
-                    data["user_id"],
-                    data["pickup_location"],
-                    data["dropoff_location"],
-                    data.get("pickup_lat"),
-                    data.get("pickup_lng"),
-                    data.get("dropoff_lat"),
-                    data.get("dropoff_lng")
-                )
-            )
-            conn.commit()
+            ride_ops.save_ride(data)
             return {"message": "Ride requested successfully!"}, 201
         except sqlite3.Error as e:
             return {"error": f"Database error: {str(e)}"}, 500
-        finally:
-            if conn:
-                conn.close()
 
     def get_ride_status(self, ride_id):
-        
         try:
-            conn = DatabaseConnector.get_connection()
-            cursor = conn.cursor()
-            cursor.execute("SELECT Status FROM Rides WHERE RideID = ?", (ride_id,))
-            row = cursor.fetchone()
-
+            row = ride_ops.get_ride_status_by_id(ride_id)
             if row:
                 return {"ride_id": ride_id, "status": row["Status"]}, 200
             else:
                 return {"error": "Ride not found"}, 404
         except sqlite3.Error as e:
             return {"error": f"Database error: {str(e)}"}, 500
-        finally:
-            if conn:
-                conn.close()
+
 
     def assign_nearest_driver(self, ride_id, pickup_lat, pickup_lng):
-        conn = None
         try:
-            conn = DatabaseConnector.get_connection()
-            conn.row_factory = sqlite3.Row  
-            cursor = conn.cursor()
+            # Convert pickup to Coordinate
+            pickup_point = Coordinate(lat=pickup_lat, lng=pickup_lng)
 
-            cursor.execute("""
-                SELECT DriverID, Latitude, Longitude
-                FROM Drivers
-                WHERE Status = 'Available' AND Latitude IS NOT NULL AND Longitude IS NOT NULL
-            """)
-            drivers = cursor.fetchall()
-
+            drivers = ride_ops.get_available_drivers()
             if not drivers:
                 return {"error": "No available drivers found"}, 404
 
+            # Find the nearest driver using Coordinate
             nearest_driver = min(
                 drivers,
                 key=lambda d: calculate_distance(
-                    pickup_lat, pickup_lng, d["Latitude"], d["Longitude"]
+                    pickup_point,
+                    Coordinate(d["Latitude"], d["Longitude"])
                 )
             )
-
             driver_id = nearest_driver["DriverID"]
 
-            cursor.execute("SELECT PickupLatitude, PickupLongitude, DropoffLatitude, DropoffLongitude FROM Rides WHERE RideID = ?", (ride_id,))
-            ride = cursor.fetchone()
+            # Get ride pickup/dropoff coordinates
+            ride = ride_ops.get_ride_coordinates(ride_id)
             if not ride:
                 return {"error": "Ride not found"}, 404
 
@@ -89,17 +53,14 @@ class RideService:
             ):
                 return {"error": "Ride pickup or dropoff coordinates are missing"}, 400
 
+            # Build coordinates for fare calculation
+            pickup = Coordinate(ride["PickupLatitude"], ride["PickupLongitude"])
+            dropoff = Coordinate(ride["DropoffLatitude"], ride["DropoffLongitude"])
 
-            fare = calculate_fare(
-                ride["PickupLatitude"], ride["PickupLongitude"],
-                ride["DropoffLatitude"], ride["DropoffLongitude"]
-            )
+            fare = calculate_fare(pickup, dropoff)
 
-            cursor.execute("UPDATE Rides SET Fare = ? WHERE RideID = ?", (fare, ride_id))
-
-            cursor.execute("UPDATE Rides SET DriverID = ?, Status = 'Ongoing' WHERE RideID = ?", (driver_id, ride_id))
-            cursor.execute("UPDATE Drivers SET Status = 'Busy' WHERE DriverID = ?", (driver_id,))
-            conn.commit()
+            # Assign driver and update fare
+            ride_ops.assign_driver_to_ride(driver_id, ride_id, fare)
 
             return {
                 "message": "Driver auto-assigned successfully",
@@ -108,7 +69,3 @@ class RideService:
 
         except sqlite3.Error as e:
             return {"error": f"Database error: {str(e)}"}, 500
-
-        finally:
-            if conn:
-                conn.close()

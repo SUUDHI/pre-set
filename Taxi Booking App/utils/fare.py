@@ -1,9 +1,8 @@
+from utils.coordinate import Coordinate
 from utils.distance import calculate_distance
+from utils.fare_config import BASE_FARE, RATE_PER_KM
 
-def calculate_fare(pickup_lat, pickup_lng, drop_lat, drop_lng):
-    base_fare = 50  
-    rate_per_km = 15
-
-    distance = calculate_distance(pickup_lat, pickup_lng, drop_lat, drop_lng)
-    fare = base_fare + (distance * rate_per_km)
+def calculate_fare(pickup: Coordinate, dropoff: Coordinate) -> float:
+    distance = calculate_distance(pickup, dropoff)
+    fare = BASE_FARE + (distance * RATE_PER_KM)
     return round(fare, 2)

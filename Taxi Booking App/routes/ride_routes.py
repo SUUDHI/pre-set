@@ -8,7 +8,7 @@ ride_service = RideService()
 
 
 @ride_bp.route("/request", methods=["POST"])
-@token_required(role="user")  # ✅ only users can request rides
+@token_required(role="user")  
 def request_ride():
     data = request.get_json()
     if not data:
@@ -29,7 +29,7 @@ def ride_status(ride_id):
     return jsonify(response), status
 
 
-@ride_bp.route("/assign_driver", methods=["POST"])
+@ride_bp.route("/assign-driver", methods=["POST"])
 @token_required(role="driver")
 def assign_driver():
     data = request.get_json()
