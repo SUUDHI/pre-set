@@ -1,5 +1,6 @@
 from utils.jwt_handler import generate_token
 from db_operations.driver_ops import save_driver, get_driver_by_credentials
+from db_operations import driver_ops 
 import sqlite3
 
 class DriverService:
@@ -20,3 +21,11 @@ class DriverService:
             return {"token": token}, 200
         else:
             return {"error": "Invalid credentials"}, 401
+
+    @staticmethod
+    def update_location(driver_id, latitude, longitude):
+        try:
+            driver_ops.update_driver_location(driver_id, latitude, longitude)
+            return {"message": "Driver location updated successfully."}, 200
+        except sqlite3.Error as e:
+            return {"error": f"Database error: {str(e)}"}, 500

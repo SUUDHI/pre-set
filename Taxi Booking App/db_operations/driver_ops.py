@@ -46,3 +46,18 @@ def mark_driver_available(driver_id):
     cursor.execute("UPDATE Drivers SET Status = 'Available' WHERE DriverID = ?", (driver_id,))
     conn.commit()
     conn.close()
+
+def update_driver_location(driver_id, latitude, longitude):
+    conn = DatabaseConnector.get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE Drivers
+            SET Latitude = ?, Longitude = ?, Current_Location = ?
+            WHERE DriverID = ?
+        """, (latitude, longitude, f"{latitude},{longitude}", driver_id))
+        conn.commit()
+    except sqlite3.Error as e:
+        raise e
+    finally:
+        conn.close()

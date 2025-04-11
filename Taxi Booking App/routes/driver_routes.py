@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify
 from services.driver_service import DriverService
 from utils.validators import validate_driver_data
+from utils.jwt_utils import token_required
+from flask import g
 
 driver_bp = Blueprint("driver", __name__)
 driver_service = DriverService()
@@ -28,3 +30,18 @@ def login_driver():
 
     response, status = driver_service.login_driver(email, password)
     return jsonify(response), status
+
+@driver_bp.route("/update-location", methods=["POST"])
+@token_required(role="driver")
+def update_driver_location():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON format"}), 400
+
+    latitude = data.get("latitude")
+    longitude = data.get("longitude")
+
+    if latitude is None or longitude is None:
+        return jsonify({"error": "Latitude and longitude are required"}), 400
+
+    return DriverService.update_location(g.driver_id, latitude, longitude)
