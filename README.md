@@ -1,6 +1,6 @@
-.
 
-🚖 Taxi Booking App
+Taxi Booking App
+
 A backend solution for a taxi booking service that enables users to register, request rides, and get matched with available drivers based on proximity, availability, and preferences. Built with Flask, the project follows SOLID principles, features JWT authentication, and ensures maintainability with a modular structure.
 
 🔧 Features
@@ -22,51 +22,54 @@ A backend solution for a taxi booking service that enables users to register, re
 bash
 Copy
 Edit
-taxi-booking-app/
+
+## structure
+```taxi-booking-app/
 ├── app/
-│   ├── main.py               # App factory & route registrations
-│   ├── __init__.py
-│
+│   ├── main.py                   
+│   │
+│   └── templates/
+│       └── index.html            
 ├── routes/
-│   ├── auth_routes.py
-│   ├── driver_routes.py
-│   ├── ride_routes.py
+│   ├── auth_routes.py            
+│   ├── driver_routes.py          
+│   ├── ride_routes.py            
 │
 ├── services/
-│   ├── user_service.py
-│   ├── driver_service.py
-│   ├── ride_service.py
+│   ├── user_service.py           
+│   ├── driver_service.py         
+│   ├── ride_service.py           
 │
 ├── db_operations/
-│   ├── ride_ops.py
-│   ├── user_ops.py
-│   ├── driver_ops.py
+│   ├── user_ops.py               
+│   ├── driver_ops.py             
+│   ├── ride_ops.py               
 │
 ├── utils/
-│   ├── jwt_handler.py
-│   ├── jwt_utils.py
-│   ├── validators.py
-│   ├── distance.py
-│   ├── fare.py
-│   ├── config.py
-│   ├── coordinate.py
+│   ├── jwt_handler.py            
+│   ├── jwt_utils.py              
+│   ├── validators.py             
+│   ├── distance.py               
+│   ├── fare.py                   
+│   ├── config.py                 
+│   ├── coordinate.py             
 │
 ├── db/
-│   ├── connect_db.py
-│   ├── initialize_db.py
+│   ├── connect_db.py             
+│   ├── initialize_db.py          
+│     
 │
-├── templates/
-│   ├── index.html
-│
-├── instance/
-│   └── your_database.db      # SQLite DB file (auto-created)
-│
-├── run.py                    # Entry point
-└── README.md
+└── taxi_booking.db                
+├── run.py                        
+└── README.md                    
+```
+
 🚀 Getting Started
+```
 ✅ Requirements
 Python 3.9+
 
 Flask
 
 SQLite (default, no setup needed)
+```
