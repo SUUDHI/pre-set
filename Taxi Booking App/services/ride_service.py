@@ -69,3 +69,20 @@ class RideService:
 
         except sqlite3.Error as e:
             return {"error": f"Database error: {str(e)}"}, 500
+
+    def cancel_ride(self, ride_id, reason):
+        ride = ride_ops.get_fare_by_ride_id(ride_id)
+        if not ride:
+            return {"error": "Ride not found"}, 404
+
+        original_fare = ride["Fare"]
+        cancellation_fee = round(original_fare * 0.05, 2)
+
+        ride_ops.update_ride_as_cancelled(ride_id, reason, cancellation_fee)
+
+        return {
+            "message": "Ride cancelled successfully.",
+            "original_fare": original_fare,
+            "charged_cancellation_fee": cancellation_fee
+        }, 200
+    

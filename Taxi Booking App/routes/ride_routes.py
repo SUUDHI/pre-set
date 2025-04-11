@@ -44,3 +44,16 @@ def assign_driver():
         data["pickup_lng"]
     )
     return jsonify(response), status
+
+@ride_bp.route("/cancel", methods=["POST"])
+@token_required(role="user")
+def cancel_ride():
+    data = request.get_json()
+    ride_id = data.get("ride_id")
+    reason = data.get("reason")
+
+    if not ride_id or not reason:
+        return jsonify({"error": "ride_id and reason are required"}), 400
+
+    response, status = ride_service.cancel_ride(ride_id, reason)
+    return jsonify(response), status

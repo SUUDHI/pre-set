@@ -69,3 +69,34 @@ def assign_driver_to_ride(driver_id, ride_id, fare):
         raise e
     finally:
         conn.close()
+
+def get_ride_by_id(ride_id):
+    conn = DatabaseConnector.get_connection()
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Rides WHERE RideID = ?", (ride_id,))
+    ride = cursor.fetchone()
+    conn.close()
+    return ride
+
+def get_fare_by_ride_id(ride_id):
+    conn = DatabaseConnector.get_connection()
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT Fare FROM Rides WHERE RideID = ?", (ride_id,))
+    ride = cursor.fetchone()
+    conn.close()
+    return ride
+
+def update_ride_as_cancelled(ride_id, reason, cancellation_fee):
+    conn = DatabaseConnector.get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE Rides
+        SET Status = 'Cancelled',
+            Cancellation_Reason = ?,
+            Fare = ?
+        WHERE RideID = ?
+    """, (reason, cancellation_fee, ride_id))
+    conn.commit()
+    conn.close()

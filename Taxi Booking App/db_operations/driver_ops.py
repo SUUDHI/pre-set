@@ -39,3 +39,10 @@ def get_driver_by_credentials(email, password):
     driver = cursor.fetchone()
     conn.close()
     return driver
+
+def mark_driver_available(driver_id):
+    conn = DatabaseConnector.get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE Drivers SET Status = 'Available' WHERE DriverID = ?", (driver_id,))
+    conn.commit()
+    conn.close()
