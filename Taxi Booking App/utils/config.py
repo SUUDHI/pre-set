@@ -1,1 +1,1 @@
-SECRET_KEY = "super-secret-key-123" 
+SECRET_KEY = "your-very-secure-secret-key"

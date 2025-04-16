@@ -9,7 +9,6 @@ def generate_token(payload, expires_in=3600):
 def decode_token(token):
     try:
         decoded = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-        print("🔑 Token Generated with Key:", SECRET_KEY)
         return decoded
     except jwt.ExpiredSignatureError:
         return None
