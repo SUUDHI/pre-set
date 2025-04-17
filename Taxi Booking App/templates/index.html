@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaxiGo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+        .auth-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            border-bottom: none;
+            margin-bottom: 2rem;
+        }
+        .nav-tabs .nav-link {
+            color: #6c757d;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            margin: 0 0.5rem;
+            font-weight: 500;
+        }
+        .nav-tabs .nav-link.active {
+            color: #6610f2;
+            border-bottom: 2px solid #6610f2;
+            background: none;
+        }
+        .form-control, .form-select {
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            margin-bottom: 1rem;
+        }
+        .btn-primary {
+            background-color: #6610f2;
+            border: none;
+            padding: 0.75rem;
+            width: 100%;
+            font-weight: 500;
+        }
+        .btn-primary:hover {
+            background-color: #520dc2;
+        }
+        .driver-fields {
+            display: none;
+        }
+        .form-label {
+            font-size: 0.875rem;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <ul class="nav nav-tabs" id="authTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button">Login</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button">Register</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="authTabContent">
+            <!-- Login Form -->
+            <div class="tab-pane fade show active" id="login">
+                <form id="loginForm">
+                    <input type="email" class="form-control" name="email" placeholder="Email" required>
+                    <input type="password" class="form-control" name="password" placeholder="Password" required>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+            </div>
+
+            <!-- Registration Form -->
+            <div class="tab-pane fade" id="register">
+                <form id="registerForm">
+                    <select class="form-select" id="registerRole" name="role" required onchange="toggleDriverFields()">
+                        <option value="">Select role</option>
+                        <option value="user">User</option>
+                        <option value="driver">Driver</option>
+                    </select>
+
+                    <!-- Common Fields (from Users table) -->
+                    <div id="commonFields">
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="name" placeholder="Full Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" class="form-control" name="email" placeholder="Email" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" class="form-control" name="phone" placeholder="Phone Number" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" name="birth" required>
+                        </div>
+                        <div class="form-group">
+                            <select class="form-select" name="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" class="form-control" name="password" placeholder="Password" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" class="form-control" name="confirm_password" placeholder="Confirm Password" required>
+                        </div>
+                    </div>
+
+                    <!-- Driver Fields (from Driver table) -->
+                    <div id="driver-fields" class="driver-fields">
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="licenseNumber" placeholder="License Number">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="licensePlate" placeholder="License Plate">
+                        </div>
+                        <div class="form-group">
+                            <select class="form-select" name="vehicleType">
+                                <option value="">Select Vehicle Type</option>
+                                <option value="sedan">Sedan</option>
+                                <option value="suv">SUV</option>
+                                <option value="van">Van</option>
+                                <option value="hatchback">Hatchback</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function clearForm(formId) {
+            const form = document.getElementById(formId);
+            if (form) {
+                form.reset();
+                // Clear any custom styling or validation states
+                const inputs = form.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    input.classList.remove('is-invalid', 'is-valid');
+                });
+            }
+        }
+
+        function toggleDriverFields() {
+            const role = document.getElementById('registerRole').value;
+            const driverFields = document.getElementById('driver-fields');
+            const driverInputs = document.querySelectorAll('#driver-fields input, #driver-fields select');
+            
+            // Clear the form when role changes
+            clearForm('registerForm');
+            
+            // Re-set the role since clearForm() cleared it
+            document.getElementById('registerRole').value = role;
+            
+            if (role === 'driver') {
+                driverFields.style.display = 'block';
+                driverInputs.forEach(input => input.required = true);
+            } else {
+                driverFields.style.display = 'none';
+                driverInputs.forEach(input => input.required = false);
+            }
+        }
+
+        // Handle form submissions
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: formData.get('email'),
+                        password: formData.get('password')
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    window.location.href = data.role === 'driver' ? '/driver/dashboard' : '/dashboard';
+                } else {
+                    alert(data.error || 'Login failed');
+                }
+            } catch (error) {
+                alert('An error occurred during login');
+            }
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const role = formData.get('role');
+            
+            // Validate password match
+            if (formData.get('password') !== formData.get('confirm_password')) {
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            const data = {
+                role: role,
+                name: formData.get('name'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                birth: formData.get('birth'),
+                gender: formData.get('gender'),
+                password: formData.get('password')
+            };
+
+            if (role === 'driver') {
+                data.licenseNumber = formData.get('licenseNumber');
+                data.licensePlate = formData.get('licensePlate');
+                data.vehicleType = formData.get('vehicleType');
+            }
+
+            try {
+                const response = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const responseData = await response.json();
+                if (response.ok) {
+                    alert('Registration successful! Please login.');
+                    clearForm('registerForm'); // Clear the form after successful registration
+                    document.getElementById('login-tab').click();
+                } else {
+                    alert(responseData.error || 'Registration failed');
+                }
+            } catch (error) {
+                alert('An error occurred during registration');
+            }
+        });
+
+        // Add event listeners for tab changes to clear forms
+        document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
+            tab.addEventListener('shown.bs.tab', (e) => {
+                if (e.target.id === 'login-tab') {
+                    clearForm('loginForm');
+                } else if (e.target.id === 'register-tab') {
+                    clearForm('registerForm');
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -215,3 +215,19 @@ class DriverService:
             
         except Exception as e:
             return {"error": f"Failed to accept ride: {str(e)}"}, 500
+
+    def get_requested_rides(self):
+        """
+        Get all available ride requests.
+        
+        Returns:
+            tuple[dict, int]: Response containing list of rides and status code
+        """
+        try:
+            rides = ride_ops.get_requested_rides()
+            return {
+                "rides": rides,
+                "count": len(rides)
+            }, 200
+        except Exception as e:
+            return {"error": f"Failed to fetch requested rides: {str(e)}"}, 500

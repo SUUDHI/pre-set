@@ -19,7 +19,7 @@ class TaxiApp:
 
     def register_blueprints(self):
         self.app.register_blueprint(auth_bp, url_prefix="/auth")
-        self.app.register_blueprint(ride_bp, url_prefix="/rides")
+        self.app.register_blueprint(ride_bp, url_prefix="/ride")
         self.app.register_blueprint(driver_bp, url_prefix="/driver")
 
     def register_routes(self):
@@ -37,7 +37,7 @@ class TaxiApp:
 
         @self.app.route("/dashboard")
         def user_dashboard():
-            return render_template("dashboard.html")
+            return render_template("user_dashboard.html")
 
     def run(self):
         self.app.run(debug=True, host='0.0.0.0', port=5000)

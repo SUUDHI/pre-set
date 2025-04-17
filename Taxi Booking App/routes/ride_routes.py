@@ -3,9 +3,46 @@ from services.ride_service import RideService
 from utils.coordinate import Coordinate
 from utils.jwt_utils import token_required
 from utils.validators import validate_ride_data
+import sqlite3
+from db.connect_db import DatabaseConnector
 
 ride_bp = Blueprint('ride', __name__)
 ride_service = RideService()
+
+@ride_bp.route('/history', methods=['GET'])
+@token_required()
+def get_ride_history():
+    """Get ride history for the current user"""
+    try:
+        conn = DatabaseConnector.get_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT 
+                r.RideID,
+                r.PickupLat,
+                r.PickupLon,
+                r.DropoffLat,
+                r.DropoffLon,
+                r.Fare,
+                rs.Name as Status,
+                r.RequestedAt
+            FROM Rides r
+            JOIN RideStatus rs ON r.StatusID = rs.StatusID
+            WHERE r.UserID = ?
+            ORDER BY r.RequestedAt DESC
+        """, (g.user_id,))
+        
+        rides = cursor.fetchall()
+        return jsonify({
+            "rides": [dict(ride) for ride in rides]
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
 
 @ride_bp.route('/request', methods=['POST'])
 @token_required()
@@ -76,7 +113,17 @@ def get_ride_status(ride_id):
 @token_required()
 def cancel_ride(ride_id):
     try:
-        result = ride_service.cancel_ride(ride_id)
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Invalid JSON format"}), 400
+            
+        cancellation_reason = data.get('cancellation_reason')
+        cancellation_fee = data.get('cancellation_fee', 0.0)  # Default to 0 if not provided
+        
+        if not cancellation_reason:
+            return jsonify({"error": "Cancellation reason is required"}), 400
+            
+        result = ride_service.cancel_ride(ride_id, cancellation_reason, cancellation_fee)
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

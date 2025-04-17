@@ -344,18 +344,69 @@ def get_fare_by_ride_id(ride_id):
     return ride
 
 
-def update_ride_as_cancelled(ride_id, reason, cancellation_fee):
+def update_ride_as_cancelled(ride_id: int, reason: str, cancellation_fee: float = 0.0) -> None:
+    """
+    Update a ride as cancelled with reason and fee, and set driver status to available.
+    
+    Args:
+        ride_id (int): ID of the ride to cancel
+        reason (str): Reason for cancellation
+        cancellation_fee (float): Fee charged for cancellation
+    """
     conn = DatabaseConnector.get_connection()
     cursor = conn.cursor()
-    cursor.execute("""
-        UPDATE Rides
-        SET StatusID = (SELECT StatusID FROM RideStatus WHERE StatusName = 'cancelled'),
-            CancellationReason = ?,
-            Fare = ?
-        WHERE RideID = ?
-    """, (reason, cancellation_fee, ride_id))
-    conn.commit()
-    conn.close()
+    try:
+        # Get status ID for 'cancelled'
+        cursor.execute("SELECT StatusID FROM RideStatus WHERE Name = ?", ("cancelled",))
+        status = cursor.fetchone()
+        if not status:
+            raise ValueError("Cancelled status not found")
+        
+        status_id = status[0]
+        
+        # Get driver ID from the ride
+        cursor.execute("SELECT DriverID FROM Rides WHERE RideID = ?", (ride_id,))
+        ride = cursor.fetchone()
+        if not ride:
+            raise ValueError("Ride not found")
+            
+        driver_id = ride[0]
+        
+        # Update ride with cancellation details and set fare to 0
+        cursor.execute(
+            """
+            UPDATE Rides 
+            SET StatusID = ?,
+                CancellationReason = ?,
+                CancellationFee = ?,
+                Fare = 0
+            WHERE RideID = ?
+            """,
+            (
+                status_id,
+                reason,
+                cancellation_fee,
+                ride_id
+            )
+        )
+        
+        # If there's a driver assigned, update their status to available
+        if driver_id:
+            cursor.execute(
+                """
+                UPDATE Driver 
+                SET StatusID = (SELECT StatusID FROM DriverStatus WHERE Name = 'available')
+                WHERE UserID = ?
+                """,
+                (driver_id,)
+            )
+        
+        conn.commit()
+    except sqlite3.Error as e:
+        conn.rollback()
+        raise e
+    finally:
+        conn.close()
 
 
 def calculate_ride_eta(ride_id: int) -> dict:
@@ -457,6 +508,45 @@ def cancel_ride(ride_id: int, reason: str, cancellation_fee: float = 0.0) -> Non
         conn.commit()
     except sqlite3.Error as e:
         conn.rollback()
+        raise e
+    finally:
+        conn.close()
+
+
+def get_requested_rides():
+    """
+    Get all rides that are in 'requested' status and not assigned to any driver.
+    
+    Returns:
+        list: List of requested rides with their details
+    """
+    conn = DatabaseConnector.get_connection()
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT 
+                r.RideID,
+                r.UserID,
+                r.PickupLat,
+                r.PickupLon,
+                r.DropoffLat,
+                r.DropoffLon,
+                r.Fare,
+                r.RequestedAt,
+                u.Name as UserName,
+                u.Phone as UserPhone,
+                rs.Name as Status
+            FROM Rides r
+            JOIN Users u ON r.UserID = u.UserID
+            JOIN RideStatus rs ON r.StatusID = rs.StatusID
+            WHERE rs.Name = 'requested'
+            AND r.DriverID IS NULL
+            ORDER BY r.RequestedAt DESC
+        """)
+        rides = cursor.fetchall()
+        return [dict(ride) for ride in rides]
+    except sqlite3.Error as e:
         raise e
     finally:
         conn.close()

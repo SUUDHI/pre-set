@@ -17,7 +17,8 @@ from db_operations.ride_ops import (
     get_fare_by_ride_id,
     update_ride_as_cancelled,
     calculate_ride_eta,
-    get_ride_with_eta
+    get_ride_with_eta,
+    update_ride_status
 )
 from datetime import datetime
 
@@ -182,19 +183,42 @@ class RideService:
         except Exception as e:
             return {"error": f"Unexpected error: {str(e)}"}, 500
 
-    def cancel_ride(self, ride_id: int) -> dict:
+    def cancel_ride(self, ride_id: int, cancellation_reason: str, cancellation_fee: float = 0.0) -> dict:
         """
-        Cancel a ride.
+        Cancel a ride with reason and fee.
         
         Args:
             ride_id (int): ID of the ride to cancel
+            cancellation_reason (str): Reason for cancellation
+            cancellation_fee (float): Fee charged for cancellation
             
         Returns:
             dict: Cancellation confirmation
         """
         try:
-            ride_ops.update_ride_status(ride_id, "cancelled")
-            return {"message": "Ride cancelled successfully"}, 200
+            # First check if ride exists and get current status
+            ride = self.ride_repository.get_ride(ride_id)
+            if not ride:
+                return {"error": "Ride not found"}, 404
+                
+            # Check if ride is already cancelled
+            if ride.get('Status') == 'cancelled':
+                return {"error": "Ride is already cancelled"}, 400
+            
+            # Calculate 5% of fare as cancellation fee
+            fare = ride.get('Fare', 0.0)
+            calculated_cancellation_fee = fare * 0.05
+            
+            # Update ride status with reason and fee
+            update_ride_as_cancelled(ride_id, cancellation_reason, calculated_cancellation_fee)
+            
+            return {
+                "message": "Ride cancelled successfully",
+                "ride_id": ride_id,
+                "cancellation_reason": cancellation_reason,
+                "cancellation_fee": calculated_cancellation_fee,
+                "original_fare": fare
+            }, 200
             
         except sqlite3.Error as e:
             return {"error": f"Database error: {str(e)}"}, 500

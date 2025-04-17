@@ -77,3 +77,13 @@ def accept_ride(ride_id):
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@driver_bp.route("/rides/requested", methods=["GET"])
+@token_required(role="driver")
+def get_requested_rides():
+    """Get all available ride requests"""
+    try:
+        response, status = driver_service.get_requested_rides()
+        return jsonify(response), status
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
