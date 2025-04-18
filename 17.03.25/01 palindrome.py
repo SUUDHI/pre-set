@@ -3,12 +3,16 @@ Palindrome Checker:
 Write a function that checks if a given string is a palindrome (reads the same forwards and backwards)."""
 
 def palindrome(string):
-    rev_str = string[: : -1]
-    
-    if string == rev_str:
-        print(f"{rev_str} is a palindrome")
-    else:
-        print(f"{string} is non palindrome")
+    reversed_string = ""
 
-s1 = input("Enter a string: ")
-palindrome(s1)
+    for char in string:
+        reversed_string = char + reversed_string
+    
+    if string == reversed_string:
+        print(string,"is an Palindrome.")
+    else:
+        print(string,"not an palindrome.")
+
+string_check = input("Enter a string to check: ")
+
+palindrome(string_check)
