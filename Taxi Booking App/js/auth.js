@@ -4,16 +4,16 @@ function checkAuth() {
     const role = localStorage.getItem('role');
     
     if (!token) {
-        window.location.href = '/';
+        window.location.href = '/index.html';
         return;
     }
 
     // Redirect if on wrong dashboard
     const currentPage = window.location.pathname;
     if (role === 'user' && currentPage.includes('driver')) {
-        window.location.href = '/user-dashboard';
+        window.location.href = '/user-dashboard.html';
     } else if (role === 'driver' && currentPage.includes('user')) {
-        window.location.href = '/driver-dashboard';
+        window.location.href = '/driver-dashboard.html';
     }
 }
 
@@ -43,9 +43,9 @@ if (document.getElementById('loginForm')) {
                 
                 // Redirect based on role
                 if (role === 'driver') {
-                    window.location.href = '/driver-dashboard';
+                    window.location.href = '/driver-dashboard.html';
                 } else {
-                    window.location.href = '/user-dashboard';
+                    window.location.href = '/user-dashboard.html';
                 }
             } else {
                 document.getElementById('error-message').textContent = data.error || 'Login failed';
@@ -61,7 +61,7 @@ function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     localStorage.removeItem('email');
-    window.location.href = '/';
+    window.location.href = '/index.html';
 }
 
 // Display user email in dashboard
@@ -74,7 +74,7 @@ function displayUserEmail() {
 }
 
 // Run on page load
-if (!window.location.pathname.includes('index')) {
+if (!window.location.pathname.includes('index.html')) {
     checkAuth();
     displayUserEmail();
 } 

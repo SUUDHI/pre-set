@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaxiGo - Driver Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">🚖 TaxiGo</div>
+        <div class="nav-links">
+            <span id="driverEmail"></span>
+            <button onclick="logout()" class="btn-secondary">Logout</button>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="dashboard-grid">
+            <!-- Location Update Form -->
+            <div class="card">
+                <h2>Update Location</h2>
+                <form id="locationForm">
+                    <div class="form-group">
+                        <label>Current Location</label>
+                        <div class="location-inputs">
+                            <input type="number" id="latitude" name="latitude" placeholder="Latitude" step="any" required>
+                            <input type="number" id="longitude" name="longitude" placeholder="Longitude" step="any" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">Update Location</button>
+                </form>
+
+                <div class="status-toggle">
+                    <label>Status:</label>
+                    <select id="driverStatus">
+                        <option value="available">Available</option>
+                        <option value="busy">Busy</option>
+                        <option value="offline">Offline</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Ride Requests -->
+            <div class="card">
+                <h2>Ride Requests</h2>
+                <div class="table-container">
+                    <table id="requestsTable">
+                        <thead>
+                            <tr>
+                                <th>Ride ID</th>
+                                <th>Pickup</th>
+                                <th>Dropoff</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/driver-dashboard.js') }}"></script>
+</body>
+</html> 
