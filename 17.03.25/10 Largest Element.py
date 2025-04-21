@@ -1,10 +1,11 @@
-element = [10,22,33,1,32,45,77]
+numbers = [10,22,33,1,32,45,77]
 
-def largest(l1):
-    max_num = 0
-    for i in l1:
-        if i > max_num:
-            max_num = i
+def largest(numbers_list):
+    max_num = float('-inf')
+    
+    for number in numbers_list:
+        if number > max_num:
+            max_num = number
     return max_num
 
-print(largest(element))
+print(largest(numbers))

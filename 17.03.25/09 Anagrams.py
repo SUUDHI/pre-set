@@ -1,17 +1,16 @@
-def Anagrams(st1,st2):
-    st1.lower()
-    st2.lower()
+def Anagrams(input_1,input_2):
+    input_1.lower()
+    input_2.lower()
 
-    st1 = sorted(st1)
-    st2 = sorted(st2)
+    input_1 = sorted(input_1)
+    input_2 = sorted(input_2)
 
-    if st1 == st2:
+    if input_1 == input_2:
         print("strings are anagrams")
     else:
         print("strings are non anagrams ")
     
-   
-s1 = 'slient'
-s2 = 'listen'
+input_1 = 'slient'
+input_2 = 'listen'
 
-Anagrams(s1,s2)
+Anagrams(input_1,input_2)

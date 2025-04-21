@@ -2,8 +2,11 @@
 # Input: {'x': 10, 'y': 20, 'z': 30}
 # Output: 60
 
-dic = {'x': 10, 'y': 20, 'z': 30}
+data = {'x': 10, 'y': 20, 'z': 30}
+
 sum = 0
-for key,value in dic.items():
+
+for key,value in data.items():
   sum += value
+
 print(sum)

@@ -1,18 +1,18 @@
-def isdigit(string):
+def check_digit(string):
     digit = []
-    for i in string:
-        if i > "0" and i <= "9":
-            digit.append(i)
+    for char in string:
+        if char > "0" and char <= "9":
+            digit.append(char)
     return digit
 
-def isdigit2(s1):
+def check_digit_2(string):
     digit2 = []
-    for i in s1:
-        if i.isdigit():
-            digit2.append(i)
+    for char in string:
+        if char.isdigit():
+            digit2.append(char)
     return(digit2)
 
 
-string = "asas1213jbdja"
-print(isdigit(string))
-print(isdigit2(string))
+raw_data = "asas1213jbdja"
+print(check_digit(raw_data))
+print(check_digit_2(raw_data))
