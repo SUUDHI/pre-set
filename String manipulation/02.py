@@ -6,8 +6,8 @@ splited_string = string.split()
 
 a = []
 
-for i in splited_string:
-    i = i[::-1]
-    a.append(i) 
+for item in splited_string:
+    item = item[::-1]
+    a.append(item) 
     
 print(a)

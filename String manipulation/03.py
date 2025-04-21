@@ -4,8 +4,8 @@ string = "python programming"
 
 vowels = "AEIOUaeiou"
 
-for i in string:
-    if i in vowels:
-        string = string.replace(i,"")
+for item in string:
+    if item in vowels:
+        string = string.replace(item,"")
 
 print(string)

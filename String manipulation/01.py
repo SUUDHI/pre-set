@@ -5,8 +5,8 @@ string = "my name is sudhanshu"
 split_string = string.split()
 
 converted_string = []
-for i in split_string:
-    convert = i[0].upper() + i[1:-1] + i[-1].upper()
+for item in split_string:
+    convert = item[0].upper() + item[1:-1] + item[-1].upper()
     converted_string.append(convert)
     
 print(converted_string)

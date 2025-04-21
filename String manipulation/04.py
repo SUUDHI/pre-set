@@ -3,15 +3,16 @@
 # Output: "d"
 
 string = "aabbccdeeffg"
+
 non_repeating =[]
 
 freq = {}
 
-for i in string:
-    if i in freq:
-        freq[i]+=1
+for item in string:
+    if item in freq:
+        freq[item]+=1
     else:
-        freq[i]=1
+        freq[item]=1
 
 for key,value in freq.items():
     if value == 1:
