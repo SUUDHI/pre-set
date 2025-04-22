@@ -1,16 +1,17 @@
 from flask import Blueprint, request, jsonify, g
 from services.ride_service import RideService
 from utils.coordinate import Coordinate
-from utils.jwt_utils import token_required
-from utils.validators import validate_ride_data
+from utils.jwt_handler import jwt_handler
+from services.validators import RideValidator
 import sqlite3
 from db.connect_db import DatabaseConnector
 
 ride_bp = Blueprint('ride', __name__)
 ride_service = RideService()
+ride_validator = RideValidator()
 
 @ride_bp.route('/history', methods=['GET'])
-@token_required()
+@jwt_handler.token_required()
 def get_ride_history():
     """Get ride history for the current user"""
     try:
@@ -26,8 +27,10 @@ def get_ride_history():
                 r.DropoffLat,
                 r.DropoffLon,
                 r.Fare,
+                r.CancellationFee,
                 rs.Name as Status,
-                r.RequestedAt
+                r.RequestedAt,
+                r.CancellationReason
             FROM Rides r
             JOIN RideStatus rs ON r.StatusID = rs.StatusID
             WHERE r.UserID = ?
@@ -45,15 +48,15 @@ def get_ride_history():
             conn.close()
 
 @ride_bp.route('/request', methods=['POST'])
-@token_required()
+@jwt_handler.token_required()
 def request_ride():
     try:
         data = request.get_json()
         if not data:
             return jsonify({"error": "Invalid JSON format"}), 400
             
-        # Validate ride data
-        is_valid, error_message = validate_ride_data(data)
+        # Validate ride data using the new validator
+        is_valid, error_message = ride_validator.validate(data)
         if not is_valid:
             return jsonify({"error": error_message}), 400
         
@@ -82,7 +85,7 @@ def request_ride():
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
 @ride_bp.route('/<int:ride_id>/status', methods=['GET'])
-@token_required()
+@jwt_handler.token_required()
 def get_ride_status(ride_id):
     try:
         print(f"Fetching status for ride {ride_id}, user_id: {g.user_id}, role: {g.role}")  # Debug log
@@ -110,7 +113,7 @@ def get_ride_status(ride_id):
         return jsonify({"error": str(e)}), 500
 
 @ride_bp.route('/<int:ride_id>/cancel', methods=['POST'])
-@token_required()
+@jwt_handler.token_required()
 def cancel_ride(ride_id):
     try:
         data = request.get_json()
@@ -129,7 +132,7 @@ def cancel_ride(ride_id):
         return jsonify({"error": str(e)}), 500
 
 @ride_bp.route('/<int:ride_id>/eta', methods=['GET'])
-@token_required()
+@jwt_handler.token_required()
 def get_ride_eta(ride_id):
     try:
         result = ride_service.get_ride_eta(ride_id)

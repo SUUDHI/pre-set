@@ -1,7 +1,7 @@
 # services/user_service.py
 import sqlite3
 from db.connect_db import DatabaseConnector
-from utils.jwt_handler import generate_token
+from utils.jwt_handler import jwt_handler
 
 class UserService:
     def register_user(self, data):
@@ -41,7 +41,8 @@ class UserService:
             user = cursor.fetchone()
 
             if user:
-                token = generate_token({"user_id": user["id"], "role": user["role"]})
+                payload = {"user_id": user["id"], "role": user["role"]}
+                token = jwt_handler.generate_token(payload)
                 return {"token": token, "role": user["role"]}, 200
             return {"error": "Invalid credentials"}, 401
 

@@ -1,14 +1,19 @@
 # ✅ services/auth_service.py
 from db_operations import user_ops
-from utils.jwt_handler import generate_token
+from utils.jwt_handler import jwt_handler
+from services.validators import UserValidator
+from services.password_service import BcryptPasswordHasher
 import sqlite3
 import bcrypt
 import re
+from typing import Dict, Tuple, Any
 
 class AuthService:
     def __init__(self):
         self.email_regex = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
         self.phone_regex = re.compile(r'^\+?1?\d{9,15}$')
+        self.validator = UserValidator()
+        self.password_hasher = BcryptPasswordHasher()
 
     def validate_user_data(self, data):
         # Validate email format
@@ -28,10 +33,10 @@ class AuthService:
     def hash_password(self, password):
         return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
-    def register_user(self, data):
+    def register_user(self, data: Dict[str, Any]) -> Tuple[Dict[str, Any], int]:
         try:
             # Validate user data
-            is_valid, error_message = self.validate_user_data(data)
+            is_valid, error_message = self.validator.validate(data)
             if not is_valid:
                 return {"error": error_message}, 400
 
@@ -43,7 +48,7 @@ class AuthService:
                 return {"error": "Phone number already registered"}, 400
 
             # Hash password
-            data['password'] = self.hash_password(data['password']).decode('utf-8')
+            data['password'] = self.password_hasher.hash_password(data['password'])
 
             # Save user
             user_ops.save_user(data)
@@ -61,22 +66,22 @@ class AuthService:
         except Exception as e:
             return {"error": f"Unexpected error: {str(e)}"}, 500
 
-    def login_user(self, email, password):
+    def login_user(self, email: str, password: str) -> Tuple[Dict[str, Any], int]:
         try:
             user = user_ops.get_user_by_email(email)
             if not user:
                 return {"error": "Invalid credentials"}, 401
 
             # Verify password
-            if not bcrypt.checkpw(password.encode('utf-8'), user['Password'].encode('utf-8')):
+            if not self.password_hasher.verify_password(password, user['Password']):
                 return {"error": "Invalid credentials"}, 401
 
-            # Generate token
+            # Generate token using the new jwt_handler
             payload = {
                 "user_id": user["UserID"],
                 "role": user["Role"]
             }
-            token = generate_token(payload)
+            token = jwt_handler.generate_token(payload)
             return {"token": token, "user": {
                 "id": user["UserID"],
                 "name": user["Name"],

@@ -254,3 +254,46 @@ def get_driver_by_id(driver_id: int) -> dict:
         return dict(driver) if driver else None
     finally:
         conn.close()
+
+
+def get_ride_requests(driver_id: int) -> list:
+    """
+    Get all ride requests for a specific driver.
+    
+    Args:
+        driver_id (int): ID of the driver
+        
+    Returns:
+        list: List of ride requests
+    """
+    conn = DatabaseConnector.get_connection()
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT 
+                r.RideID,
+                r.UserID,
+                r.PickupLat,
+                r.PickupLon,
+                r.DropoffLat,
+                r.DropoffLon,
+                r.Fare,
+                r.RequestedAt,
+                rs.Name as Status,
+                u.Name as UserName,
+                u.Phone as UserPhone
+            FROM Rides r
+            JOIN Users u ON r.UserID = u.UserID
+            JOIN RideStatus rs ON r.StatusID = rs.StatusID
+            WHERE (r.DriverID = ? OR r.DriverID IS NULL)
+            AND rs.Name = 'requested'
+            ORDER BY r.RequestedAt DESC
+        """, (driver_id,))
+        rides = cursor.fetchall()
+        return [dict(ride) for ride in rides]
+    except sqlite3.Error as e:
+        print(f"Error fetching ride requests: {str(e)}")
+        return []
+    finally:
+        conn.close()

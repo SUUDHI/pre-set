@@ -3,11 +3,13 @@
 from flask import Blueprint, request, jsonify, render_template
 from services.auth_service import AuthService
 from services.driver_service import DriverService
-from utils.jwt_handler import generate_token
+from services.validators import UserValidator
+from utils.jwt_handler import jwt_handler
 
 auth_bp = Blueprint("auth", __name__)
 auth_service = AuthService()
 driver_service = DriverService()
+user_validator = UserValidator()
 
 @auth_bp.route("/register", methods=["POST"])
 def register():

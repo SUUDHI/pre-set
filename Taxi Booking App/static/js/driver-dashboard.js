@@ -8,29 +8,87 @@ async function loadRideRequests() {
         });
 
         const data = await response.json();
-        const tableBody = document.getElementById('requestsTableBody');
+        const rideList = document.getElementById('requestsTableBody');
         
-        if (response.ok && data.rides) {
-            tableBody.innerHTML = data.rides.map(ride => `
-                <tr>
-                    <td>${ride.RideID}</td>
-                    <td>${ride.PickupLat}, ${ride.PickupLon}</td>
-                    <td>${ride.DropoffLat}, ${ride.DropoffLon}</td>
-                    <td>
-                        <span class="status-badge status-${ride.Status.toLowerCase()}">
-                            ${ride.Status}
-                        </span>
-                    </td>
-                    <td>
-                        ${getActionButtons(ride)}
-                    </td>
-                </tr>
-            `).join('');
+        if (response.ok) {
+            // Check if data is an array (direct response) or has a rides property
+            const rides = Array.isArray(data) ? data : (data.rides || []);
+            
+            if (rides.length === 0) {
+                rideList.innerHTML = '<div class="no-rides">No ride requests available</div>';
+                return;
+            }
+
+            rideList.innerHTML = rides.map(ride => {
+                // Format the coordinates to be more readable
+                const pickupCoords = `${parseFloat(ride.PickupLat).toFixed(6)}, ${parseFloat(ride.PickupLon).toFixed(6)}`;
+                const dropoffCoords = `${parseFloat(ride.DropoffLat).toFixed(6)}, ${parseFloat(ride.DropoffLon).toFixed(6)}`;
+                
+                // Format the status for display
+                const status = ride.Status.toLowerCase();
+                
+                // Format the fare
+                const fare = parseFloat(ride.Fare).toFixed(2);
+                
+                // Format the date
+                const requestDate = new Date(ride.RequestedAt).toLocaleString('en-IN', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+
+                return `
+                    <div class="ride-card">
+                        <div class="ride-header">
+                            <div class="ride-title">
+                                <span class="ride-number">Ride #${ride.RideID}</span>
+                                <span class="status-badge status-${status}">
+                                    ${status}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ride-details">
+                            <div class="location-info">
+                                <i class="fas fa-map-marker-alt pickup-icon"></i>
+                                <div class="location-text">
+                                    <span class="location-label">Pickup:</span>
+                                    <span class="coordinates">${pickupCoords}</span>
+                                </div>
+                            </div>
+                            <div class="location-info">
+                                <i class="fas fa-flag-checkered dropoff-icon"></i>
+                                <div class="location-text">
+                                    <span class="location-label">Dropoff:</span>
+                                    <span class="coordinates">${dropoffCoords}</span>
+                                </div>
+                            </div>
+                            <div class="ride-meta">
+                                <div class="fare-info">
+                                    <i class="fas fa-rupee-sign"></i>
+                                    <span class="fare-label">Fare:</span>
+                                    <span class="fare-amount">₹${fare}</span>
+                                </div>
+                                <div class="time-info">
+                                    <i class="far fa-clock"></i>
+                                    <span class="time-label">Requested:</span>
+                                    <span class="request-time">${requestDate}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         } else {
-            throw new Error(data.error || 'Failed to load ride requests');
+            console.error('Error response:', data);
+            rideList.innerHTML = '<div class="error-message">Failed to load ride requests</div>';
         }
     } catch (error) {
         console.error('Error loading ride requests:', error);
+        const rideList = document.getElementById('requestsTableBody');
+        rideList.innerHTML = '<div class="error-message">Error loading ride requests</div>';
     }
 }
 

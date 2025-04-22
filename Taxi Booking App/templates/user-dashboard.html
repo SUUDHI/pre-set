@@ -5,10 +5,170 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaxiGo - User Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .reason-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .reason-item {
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .reason-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .reason-item.selected {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        /* New table styles */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        #ridesTable {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        #ridesTable th,
+        #ridesTable td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #ridesTable th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        #ridesTable tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .status-requested {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status-accepted {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-cancelled {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .status-completed {
+            background-color: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .location-cell {
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .table-container {
+                margin: 10px -15px;
+            }
+        }
+
+        /* Add styles for fees */
+        .fee-cell {
+            font-weight: 500;
+        }
+        
+        .fee-cancelled {
+            color: #dc3545;
+        }
+        
+        .fee-normal {
+            color: #28a745;
+        }
+
+        .cancellation-reason {
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
-        <div class="nav-brand">🚖 TaxiGo</div>
+        <div class="nav-brand">Taxi Booking System</div>
         <div class="nav-links">
             <span id="userEmail"></span>
             <button onclick="logout()" class="btn-secondary">Logout</button>
@@ -51,6 +211,7 @@
                                 <th>Pickup</th>
                                 <th>Dropoff</th>
                                 <th>Fare</th>
+                                <th>Cancellation Fee</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -58,6 +219,27 @@
                     </table>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Cancel Ride Modal -->
+    <div id="cancelModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeCancelModal()">&times;</span>
+            <h2>Cancel Ride</h2>
+            <p>Please select a reason for cancellation:</p>
+            <ul class="reason-list" id="reasonList">
+                <li class="reason-item" onclick="selectReason(this, 'Changed my plans')">Changed my plans</li>
+                <li class="reason-item" onclick="selectReason(this, 'Driver taking too long')">Driver taking too long</li>
+                <li class="reason-item" onclick="selectReason(this, 'Booked by mistake')">Booked by mistake</li>
+                <li class="reason-item" onclick="selectReason(this, 'Wrong location entered')">Wrong location entered</li>
+                <li class="reason-item" onclick="selectReason(this, 'Other')">Other</li>
+            </ul>
+            <div class="form-group" id="otherReasonGroup" style="display: none;">
+                <label for="otherReason">Please specify:</label>
+                <input type="text" id="otherReason" class="form-control">
+            </div>
+            <button onclick="confirmCancellation()" class="btn-primary">Confirm Cancellation</button>
         </div>
     </div>
 
