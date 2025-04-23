@@ -1,12 +1,30 @@
 #input = 'my name is sudhanshu meena and output needs to be MY NamE IS SudhanshU MeenA
 
-string = "my name is sudhanshu"
+def manual_split(text):
+    result = []
+    word = ""
 
-split_string = string.split()
+    for char in text:
+        if char != " ":        
+            word += char
+        else:
+            if word:           
+                result.append(word)
+                word = ""      
 
-converted_string = []
-for item in split_string:
+    if word:
+        result.append(word)
+
+    return result
+
+data = "my name is sudhanshu"
+
+splited_data = manual_split(data)
+
+converted_data = []
+
+for item in splited_data:
     convert = item[0].upper() + item[1:-1] + item[-1].upper()
-    converted_string.append(convert)
+    converted_data.append(convert)
     
-print(converted_string)
+print(converted_data)

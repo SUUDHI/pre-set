@@ -1,13 +1,16 @@
 #Reverse each word in a sentence (keeping word order intact)
+from manual_split import manual_split
 
-string = 'hello world'
+data = 'hello world'
 
-splited_string = string.split()
+splited_data = manual_split(data)
 
-a = []
+reversed_data = []
 
-for item in splited_string:
-    item = item[::-1]
-    a.append(item) 
+for item in splited_data:
+    reversed_item = ''
+    for char in item:
+        reversed_item = char + reversed_item
+    reversed_data.append(reversed_item)
     
-print(a)
+print(reversed_data)

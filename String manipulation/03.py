@@ -1,11 +1,18 @@
 # Remove vowels from a string.
 
-string = "python programming"
+def is_vowel(char):
+    if char == 'a' or char == 'e' or char == 'i' or char == 'o' or char == 'u':
+        return True
+    
+data = "python prgroamming"
 
-vowels = "AEIOUaeiou"
+new_data = []
 
-for item in string:
-    if item in vowels:
-        string = string.replace(item,"")
+for item in data:
+    if is_vowel(item):
+        continue
+    new_data.append(item)
 
-print(string)
+new_data = ''.join(new_data)
+
+print(new_data)

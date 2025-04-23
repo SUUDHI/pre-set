@@ -5,8 +5,8 @@ string = "programming"
 
 non_duplicate = ""
 
-for i in string:
-    if i not in non_duplicate:
-        non_duplicate = non_duplicate + i
+for char in string:
+    if char not in non_duplicate:
+        non_duplicate = non_duplicate + char
 
 print(non_duplicate)
