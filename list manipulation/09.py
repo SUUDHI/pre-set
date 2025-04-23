@@ -1,6 +1,5 @@
 # Check Common Member Between Two Lists
 
-
 data_1 = [1,2,5,3,4]
 
 data_2 = [5,6,7,8,1]
