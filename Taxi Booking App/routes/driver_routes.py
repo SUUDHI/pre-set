@@ -7,7 +7,6 @@ driver_bp = Blueprint("driver", __name__)
 driver_service = DriverService()
 driver_validator = DriverValidator()
 
-
 @driver_bp.route("/register", methods=["POST"])
 def register_driver():
     data = request.get_json()

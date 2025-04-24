@@ -1,7 +1,7 @@
 // Load ride requests
 async function loadRideRequests() {
     try {
-        const response = await fetch('http://localhost:5000/driver/rides/requested', {
+        const response = await fetch('http://10.10.40.14:5000/driver/rides/requested', {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -49,6 +49,9 @@ async function loadRideRequests() {
                                     ${status}
                                 </span>
                             </div>
+                            <div class="ride-actions">
+                                ${getActionButtons(ride)}
+                            </div>
                         </div>
                         <div class="ride-details">
                             <div class="location-info">
@@ -94,23 +97,24 @@ async function loadRideRequests() {
 
 // Get action buttons based on ride status
 function getActionButtons(ride) {
-    switch (ride.Status) {
+    const status = (ride.Status || '').toUpperCase();
+    switch (status) {
         case 'REQUESTED':
             return `
-                <button onclick="acceptRide(${ride.RideID})" class="btn-secondary">
-                    Accept
+                <button onclick="acceptRide(${ride.RideID})" class="btn-primary accept-btn">
+                    <i class="fas fa-check"></i> Accept Ride
                 </button>
             `;
         case 'ACCEPTED':
             return `
                 <button onclick="startRide(${ride.RideID})" class="btn-secondary">
-                    Start
+                    <i class="fas fa-play"></i> Start Ride
                 </button>
             `;
         case 'IN_PROGRESS':
             return `
-                <button onclick="completeRide(${ride.RideID})" class="btn-secondary">
-                    Complete
+                <button onclick="completeRide(${ride.RideID})" class="btn-success">
+                    <i class="fas fa-flag-checkered"></i> Complete Ride
                 </button>
             `;
         default:
@@ -121,7 +125,7 @@ function getActionButtons(ride) {
 // Accept a ride
 async function acceptRide(rideId) {
     try {
-        const response = await fetch(`http://localhost:5000/driver/rides/${rideId}/accept`, {
+        const response = await fetch(`http://10.10.40.14:5000/driver/rides/${rideId}/accept`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -132,11 +136,12 @@ async function acceptRide(rideId) {
         
         if (response.ok) {
             alert('Ride accepted successfully');
-            loadRideRequests();
+            loadRideRequests(); // Reload the ride list
         } else {
             alert(data.error || 'Failed to accept ride');
         }
     } catch (error) {
+        console.error('Error accepting ride:', error);
         alert('An error occurred while accepting the ride');
     }
 }
@@ -151,7 +156,7 @@ document.getElementById('locationForm').addEventListener('submit', async (e) => 
     };
 
     try {
-        const response = await fetch('http://localhost:5000/driver/location', {
+        const response = await fetch('http://10.10.40.14:5000/driver/location', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -177,7 +182,7 @@ document.getElementById('driverStatus').addEventListener('change', async (e) => 
     const status = e.target.value;
 
     try {
-        const response = await fetch('http://localhost:5000/driver/status', {
+        const response = await fetch('http://10.10.40.14:5000/driver/status', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

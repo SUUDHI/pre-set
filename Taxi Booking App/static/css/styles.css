@@ -144,50 +144,102 @@ input, select {
 }
 
 .ride-card {
-    background-color: var(--card-background);
+    background: #fff;
     border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    border: 1px solid #eee;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .ride-header {
-    margin-bottom: 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
 }
 
 .ride-title {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 10px;
 }
 
 .ride-number {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: bold;
     color: #333;
 }
 
+.ride-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-primary.accept-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.3s;
+}
+
+.btn-primary.accept-btn:hover {
+    background-color: #218838;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
 .status-badge {
-    padding: 0.35rem 1rem;
-    border-radius: 50px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    text-transform: lowercase;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    text-transform: capitalize;
 }
 
-.status-badge.status-requested {
-    background-color: #fff9c4;
-    color: #fbc02d;
+.status-requested {
+    background-color: #ffc107;
+    color: #000;
 }
 
-.status-badge.status-accepted {
-    background-color: #e8f5e9;
-    color: #4caf50;
+.status-accepted {
+    background-color: #17a2b8;
+    color: #fff;
 }
 
-.status-badge.status-cancelled {
-    background-color: #ffebee;
-    color: #e53935;
+.status-in_progress {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.status-completed {
+    background-color: #6c757d;
+    color: #fff;
 }
 
 .ride-details {

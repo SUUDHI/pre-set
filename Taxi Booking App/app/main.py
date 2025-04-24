@@ -13,7 +13,10 @@ class TaxiApp:
                         static_url_path='')
         self.app.config["JSON_SORT_KEYS"] = False
         self.app.config['SECRET_KEY'] = 'your-secret-key'
+        
+        # Simple CORS configuration
         CORS(self.app)
+            
         self.register_blueprints()
         self.register_routes()
 
@@ -37,4 +40,4 @@ class TaxiApp:
 
 if __name__ == "__main__":
     app = TaxiApp().app
-    app.run()
+    app.run(host='0.0.0.0', port=5000, debug=True)
