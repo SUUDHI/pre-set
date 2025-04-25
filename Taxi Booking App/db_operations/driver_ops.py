@@ -1,6 +1,7 @@
 import sqlite3
 from db.connect_db import DatabaseConnector
 from datetime import datetime
+from typing import List, Dict, Any
 
 
 def save_driver(data):
@@ -41,14 +42,14 @@ def save_driver(data):
         cursor.execute(
             """
             INSERT INTO Driver (
-                UserID, LicenseNumber, LicensePlate, VehicleType, StatusID
+                UserID, LicenseNumber, LicensePlate, VehicleTypeID, StatusID
             ) VALUES (?, ?, ?, ?, ?)
             """,
             (
                 user_id,
                 data.get("licenseNumber"),  # Using get() to handle optional fields
                 data["licensePlate"],       # Required field
-                data.get("vehicleType"),    # Using get() to handle optional fields
+                data["vehicleTypeId"],      # Required field
                 1  # Default status (offline)
             )
         )
@@ -236,7 +237,7 @@ def get_driver_by_id(driver_id: int) -> dict:
                 d.UserID,
                 d.LicenseNumber,
                 d.LicensePlate,
-                d.VehicleType,
+                d.VehicleTypeID,
                 d.Latitude,
                 d.Longitude,
                 ds.Name as StatusName,
@@ -295,5 +296,58 @@ def get_ride_requests(driver_id: int) -> list:
     except sqlite3.Error as e:
         print(f"Error fetching ride requests: {str(e)}")
         return []
+    finally:
+        conn.close()
+
+
+def get_ride_requests_by_vehicle_type(driver_id: int, vehicle_type_id: int) -> List[Dict[str, Any]]:
+    """Get all ride requests that match the driver's vehicle type"""
+    conn = DatabaseConnector.get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT 
+                r.RideID,
+                r.UserID,
+                r.VehicleTypeID,
+                r.Fare,
+                r.RequestedAt,
+                r.PickupLat,
+                r.PickupLon,
+                r.DropoffLat,
+                r.DropoffLon,
+                rs.Name as Status,
+                vt.Name as VehicleType,
+                u.Name as UserName
+            FROM Rides r
+            JOIN RideStatus rs ON r.StatusID = rs.StatusID
+            JOIN VehicleTypes vt ON r.VehicleTypeID = vt.VehicleTypeID
+            JOIN Users u ON r.UserID = u.UserID
+            WHERE r.StatusID = (SELECT StatusID FROM RideStatus WHERE Name = 'requested')
+            AND r.VehicleTypeID = ?
+            AND r.DriverID IS NULL
+            ORDER BY r.RequestedAt DESC
+        """, (vehicle_type_id,))
+        
+        rides = []
+        for row in cursor.fetchall():
+            rides.append({
+                'RideID': row[0],
+                'UserID': row[1],
+                'VehicleTypeID': row[2],
+                'Fare': row[3],
+                'RequestedAt': row[4],
+                'PickupLat': row[5],
+                'PickupLon': row[6],
+                'DropoffLat': row[7],
+                'DropoffLon': row[8],
+                'Status': row[9],
+                'VehicleType': row[10],
+                'UserName': row[11]
+            })
+        return rides
+    except Exception as e:
+        print(f"Error getting ride requests: {e}")
+        raise e
     finally:
         conn.close()

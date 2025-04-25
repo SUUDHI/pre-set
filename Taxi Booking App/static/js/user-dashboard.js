@@ -16,6 +16,13 @@ function formatLocation(lat, lon) {
     return `${formatCoordinate(lat)}, ${formatCoordinate(lon)}`;
 }
 
+// Format datetime for display
+function formatDateTime(isoString) {
+    if (!isoString) return 'Immediate';
+    const date = new Date(isoString);
+    return date.toLocaleString();
+}
+
 // Load ride history
 async function loadRideHistory() {
     try {
@@ -37,6 +44,17 @@ async function loadRideHistory() {
                 // Format fees
                 const fareDisplay = formatCurrency(ride.Fare);
                 const cancellationFeeDisplay = formatCurrency(ride.CancellationFee);
+
+                // Format driver info
+                const driverInfo = ride.DriverID ? `
+                    <div class="driver-info">
+                        <span class="driver-name">${ride.DriverName}</span>
+                        <span class="driver-phone">${ride.DriverPhone}</span>
+                    </div>
+                ` : '';
+
+                // Format pickup time
+                const pickupTimeDisplay = formatDateTime(ride.PickupTime);
                 
                 return `
                     <tr>
@@ -50,7 +68,11 @@ async function loadRideHistory() {
                                     Reason: ${ride.CancellationReason}
                                 </div>
                             ` : ''}
+                            <div class="pickup-time">
+                                Pickup: ${pickupTimeDisplay}
+                            </div>
                         </td>
+                        <td>${ride.VehicleType || 'Standard'}</td>
                         <td class="location-cell" title="${formatLocation(ride.PickupLat, ride.PickupLon)}">
                             ${formatLocation(ride.PickupLat, ride.PickupLon)}
                         </td>
@@ -69,7 +91,10 @@ async function loadRideHistory() {
                                     Cancel Ride
                                 </button>
                             ` : status === 'ACCEPTED' ? `
-                                <span class="status-badge status-accepted">Driver Assigned</span>
+                                <div class="driver-assigned">
+                                    <span class="status-badge status-accepted">Driver Assigned</span>
+                                    ${driverInfo}
+                                </div>
                             ` : ''}
                         </td>
                     </tr>
@@ -82,11 +107,31 @@ async function loadRideHistory() {
         console.error('Error loading rides:', error);
         tableBody.innerHTML = `
             <tr>
-                <td colspan="7" style="text-align: center; padding: 20px;">
+                <td colspan="8" style="text-align: center; padding: 20px;">
                     Failed to load ride history. Please try again later.
                 </td>
             </tr>
         `;
+    }
+}
+
+// Load vehicle types
+async function loadVehicleTypes() {
+    try {
+        const response = await fetch('http://localhost:5000/driver/vehicle-types');
+        const data = await response.json();
+        
+        if (response.ok && data) {
+            const vehicleTypeSelect = document.getElementById('vehicleType');
+            vehicleTypeSelect.innerHTML = data.map(type => `
+                <option value="${type.id}">${type.name} - ${type.description} (₹${type.baseRate} base + ₹${type.pricePerKm}/km)</option>
+            `).join('');
+        } else {
+            throw new Error(data.error || 'Failed to load vehicle types');
+        }
+    } catch (error) {
+        console.error('Error loading vehicle types:', error);
+        alert('Failed to load vehicle types. Please refresh the page.');
     }
 }
 
@@ -98,8 +143,17 @@ document.getElementById('bookingForm').addEventListener('submit', async (e) => {
         pickup_lat: parseFloat(document.getElementById('pickupLat').value),
         pickup_lon: parseFloat(document.getElementById('pickupLon').value),
         dropoff_lat: parseFloat(document.getElementById('dropoffLat').value),
-        dropoff_lon: parseFloat(document.getElementById('dropoffLon').value)
+        dropoff_lon: parseFloat(document.getElementById('dropoffLon').value),
+        vehicle_type_id: parseInt(document.getElementById('vehicleType').value)
     };
+
+    // Add pickup time if specified
+    const pickupTimeInput = document.getElementById('pickupTime').value;
+    if (pickupTimeInput) {
+        // Convert local datetime to ISO string
+        const pickupDate = new Date(pickupTimeInput);
+        formData.pickup_time = pickupDate.toISOString();
+    }
 
     try {
         const response = await fetch('http://localhost:5000/ride/request', {
@@ -113,15 +167,17 @@ document.getElementById('bookingForm').addEventListener('submit', async (e) => {
 
         const data = await response.json();
         
-        if (response.ok) {
+        if (response.ok && data.ride_id) {
             alert('Ride booked successfully!');
             e.target.reset();
-            loadRideHistory();
+            await loadRideHistory(); // Wait for ride history to reload
         } else {
-            alert(data.error || 'Failed to book ride');
+            alert(data.error || 'Failed to book ride. Please try again.');
+            console.error('Booking error:', data);
         }
     } catch (error) {
-        alert('An error occurred while booking the ride');
+        console.error('Error booking ride:', error);
+        alert('An error occurred while booking the ride. Please try again.');
     }
 });
 
@@ -205,6 +261,9 @@ async function confirmCancellation() {
 
 // Load ride history on page load
 loadRideHistory();
+
+// Load vehicle types on page load
+loadVehicleTypes();
 
 // Refresh ride history every 30 seconds
 setInterval(loadRideHistory, 30000); 

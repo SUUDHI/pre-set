@@ -172,10 +172,16 @@ class DriverService:
 
     def get_requested_rides(self, driver_id: int) -> Tuple[List[Dict[str, Any]], int]:
         try:
-            rides = driver_ops.get_ride_requests(driver_id)
+            # Get driver's vehicle type
+            driver = driver_ops.get_driver_by_id(driver_id)
+            if not driver:
+                return {"error": "Driver not found"}, 404
+
+            # Get ride requests matching the driver's vehicle type
+            rides = driver_ops.get_ride_requests_by_vehicle_type(driver_id, driver['VehicleTypeID'])
             return rides, 200
         except Exception as e:
-            return [], 500
+            return {"error": f"Failed to get ride requests: {str(e)}"}, 500
 
     def accept_ride(self, driver_id: int, ride_id: int) -> Tuple[Dict[str, Any], int]:
         try:

@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, g
 from services.driver_service import DriverService
 from services.validators import DriverValidator
 from utils.jwt_handler import jwt_handler
+from db.connect_db import DatabaseConnector
 
 driver_bp = Blueprint("driver", __name__)
 driver_service = DriverService()
@@ -85,3 +86,39 @@ def get_requested_rides():
         return jsonify(response), status
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@driver_bp.route("/vehicle-types", methods=["GET"])
+def get_vehicle_types():
+    """Get all available vehicle types"""
+    try:
+        conn = DatabaseConnector.get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT 
+                VehicleTypeID,
+                Name,
+                Description,
+                BaseRate,
+                PricePerKm,
+                MaxPassengers
+            FROM VehicleTypes
+            ORDER BY BaseRate ASC
+        """)
+        
+        vehicle_types = []
+        for row in cursor.fetchall():
+            vehicle_types.append({
+                'id': row[0],
+                'name': row[1],
+                'description': row[2],
+                'baseRate': row[3],
+                'pricePerKm': row[4],
+                'maxPassengers': row[5]
+            })
+            
+        return jsonify(vehicle_types), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()

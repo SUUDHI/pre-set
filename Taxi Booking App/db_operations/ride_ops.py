@@ -30,8 +30,8 @@ def create_ride(ride_data: dict) -> int:
             """
             INSERT INTO Rides (
                 UserID, PickupLat, PickupLon, DropoffLat, DropoffLon,
-                Fare, StatusID, CreatedAt
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                Fare, StatusID, VehicleTypeID, CreatedAt
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 ride_data["user_id"],
@@ -41,6 +41,7 @@ def create_ride(ride_data: dict) -> int:
                 ride_data["dropoff_lon"],
                 ride_data["fare"],
                 status_id,
+                ride_data["vehicle_type_id"],
                 ride_data["created_at"]
             )
         )
@@ -206,20 +207,22 @@ def assign_driver_to_ride(ride_id: int, driver_id: int) -> None:
         conn.close()
 
 
-def save_ride(data):
+def save_ride(data: dict) -> int:
     """
     Save a new ride to the database.
     
     Args:
-        data (dict): Ride data containing user_id, coordinates, and other details
+        data (dict): Ride data including coordinates, user ID, and vehicle type
         
     Returns:
         int: ID of the created ride
     """
-    conn = DatabaseConnector.get_connection()
-    cursor = conn.cursor()
+    conn = None
     try:
         # Get status ID for 'requested'
+        conn = DatabaseConnector.get_connection()
+        cursor = conn.cursor()
+        
         cursor.execute("SELECT StatusID FROM RideStatus WHERE Name = ?", ("requested",))
         status = cursor.fetchone()
         if not status:
@@ -227,31 +230,45 @@ def save_ride(data):
         
         status_id = status[0]
         
+        # Insert ride record
         cursor.execute(
-            """INSERT INTO Rides (
-                UserID, DriverID, StatusID, 
-                Fare, PickupLat, PickupLon,
-                DropoffLat, DropoffLon, RequestedAt
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            """
+            INSERT INTO Rides (
+                UserID, PickupLat, PickupLon, DropoffLat, DropoffLon,
+                Fare, StatusID, VehicleTypeID, RequestedAt, PickupTime
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
             (
                 data["user_id"],
-                None,  # DriverID starts as NULL
-                status_id,
-                data["fare"],
                 data["pickup_lat"],
                 data["pickup_lon"],
                 data["dropoff_lat"],
                 data["dropoff_lon"],
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                data["fare"],
+                status_id,
+                data["vehicle_type_id"],
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                data.get("pickup_time")  # Use get() to handle None case
             )
         )
+        
+        ride_id = cursor.lastrowid
         conn.commit()
-        return cursor.lastrowid
+        return ride_id
+        
     except sqlite3.Error as e:
-        conn.rollback()
+        if conn:
+            conn.rollback()
+        print(f"Database error in save_ride: {str(e)}")  # Add debug logging
+        raise e
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print(f"Unexpected error in save_ride: {str(e)}")  # Add debug logging
         raise e
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 
 def update_pickup_time(ride_id: int) -> None:
@@ -319,19 +336,39 @@ def get_available_drivers():
     return drivers
 
 
-def get_ride_coordinates(ride_id):
+def get_ride_coordinates(ride_id: int) -> dict:
+    """
+    Get ride coordinates and vehicle type for a given ride ID.
+    
+    Args:
+        ride_id (int): ID of the ride
+        
+    Returns:
+        dict: Dictionary containing pickup/dropoff coordinates and vehicle type ID
+    """
     conn = DatabaseConnector.get_connection()
-    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("""
-        SELECT PickupLat, PickupLon, DropoffLat, DropoffLon,
-               PickupTime, DropoffTime
-        FROM Rides 
-        WHERE RideID = ?
-    """, (ride_id,))
-    ride = cursor.fetchone()
-    conn.close()
-    return ride
+    try:
+        cursor.execute(
+            """
+            SELECT PickupLat, PickupLon, DropoffLat, DropoffLon, VehicleTypeID
+            FROM Rides
+            WHERE RideID = ?
+            """,
+            (ride_id,)
+        )
+        result = cursor.fetchone()
+        if result:
+            return {
+                "pickup_lat": result[0],
+                "pickup_lng": result[1],
+                "drop_lat": result[2],
+                "drop_lng": result[3],
+                "vehicle_type_id": result[4]
+            }
+        return None
+    finally:
+        conn.close()
 
 
 def get_fare_by_ride_id(ride_id):

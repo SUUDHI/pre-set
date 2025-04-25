@@ -125,7 +125,7 @@ if (document.getElementById('registerForm')) {
         if (formData.role === 'driver') {
             formData.licensePlate = document.getElementById('reg-plate').value;
             formData.licenseNumber = document.getElementById('reg-license').value;
-            formData.vehicleType = document.getElementById('reg-vehicle-type').value;
+            formData.vehicleTypeId = parseInt(document.getElementById('reg-vehicle-type').value);
         }
         
         try {

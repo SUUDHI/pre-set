@@ -1,7 +1,7 @@
 // Load ride requests
 async function loadRideRequests() {
     try {
-        const response = await fetch('http://10.10.40.14:5000/driver/rides/requested', {
+        const response = await fetch('/driver/rides/requested', {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -125,7 +125,7 @@ function getActionButtons(ride) {
 // Accept a ride
 async function acceptRide(rideId) {
     try {
-        const response = await fetch(`http://10.10.40.14:5000/driver/rides/${rideId}/accept`, {
+        const response = await fetch(`/driver/rides/${rideId}/accept`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -156,7 +156,7 @@ document.getElementById('locationForm').addEventListener('submit', async (e) => 
     };
 
     try {
-        const response = await fetch('http://10.10.40.14:5000/driver/location', {
+        const response = await fetch('/driver/location', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -182,7 +182,7 @@ document.getElementById('driverStatus').addEventListener('change', async (e) => 
     const status = e.target.value;
 
     try {
-        const response = await fetch('http://10.10.40.14:5000/driver/status', {
+        const response = await fetch('/driver/status', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -199,12 +199,44 @@ document.getElementById('driverStatus').addEventListener('change', async (e) => 
             alert(data.error || 'Failed to update status');
         }
     } catch (error) {
+        console.error('Error updating status:', error);
         alert('An error occurred while updating status');
     }
 });
 
-// Load ride requests on page load
-loadRideRequests();
+// Fetch driver's current status
+async function loadDriverStatus() {
+    try {
+        const response = await fetch('/driver/status', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
 
-// Refresh ride requests every 30 seconds
-setInterval(loadRideRequests, 30000); 
+        const data = await response.json();
+        
+        if (response.ok && data.status) {
+            document.getElementById('driverStatus').value = data.status.toLowerCase();
+        }
+    } catch (error) {
+        console.error('Error loading driver status:', error);
+    }
+}
+
+// Load initial data
+document.addEventListener('DOMContentLoaded', () => {
+    // Display user email
+    const userEmail = localStorage.getItem('userEmail');
+    if (userEmail) {
+        document.getElementById('userEmail').textContent = userEmail;
+    }
+
+    // Load driver status
+    loadDriverStatus();
+
+    // Load ride requests
+    loadRideRequests();
+    
+    // Set up periodic refresh of ride requests
+    setInterval(loadRideRequests, 30000); // Refresh every 30 seconds
+}); 

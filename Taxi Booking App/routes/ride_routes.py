@@ -30,9 +30,16 @@ def get_ride_history():
                 r.CancellationFee,
                 rs.Name as Status,
                 r.RequestedAt,
-                r.CancellationReason
+                r.PickupTime,
+                r.CancellationReason,
+                r.DriverID,
+                d.Name as DriverName,
+                d.Phone as DriverPhone,
+                vt.Name as VehicleType
             FROM Rides r
             JOIN RideStatus rs ON r.StatusID = rs.StatusID
+            LEFT JOIN Users d ON r.DriverID = d.UserID
+            LEFT JOIN VehicleTypes vt ON r.VehicleTypeID = vt.VehicleTypeID
             WHERE r.UserID = ?
             ORDER BY r.RequestedAt DESC
         """, (g.user_id,))
@@ -50,6 +57,7 @@ def get_ride_history():
 @ride_bp.route('/request', methods=['POST'])
 @jwt_handler.token_required()
 def request_ride():
+    """Request a new ride"""
     try:
         data = request.get_json()
         if not data:
@@ -70,18 +78,38 @@ def request_ride():
             lng=float(data['dropoff_lon'])
         )
         
+        # Get vehicle type ID
+        vehicle_type_id = data.get('vehicle_type_id')
+        if not vehicle_type_id:
+            return jsonify({"error": "vehicle_type_id is required"}), 400
+        
+        # Get pickup time if provided
+        pickup_time = data.get('pickup_time')
+        
         # Request ride using user_id from token
         result = ride_service.request_ride(
             user_id=g.user_id,
             pickup=pickup,
-            dropoff=dropoff
+            dropoff=dropoff,
+            vehicle_type_id=vehicle_type_id,
+            pickup_time=pickup_time
         )
         
-        return jsonify(result)
+        # Check if result is an error tuple
+        if isinstance(result, tuple):
+            return jsonify(result[0]), result[1]
+            
+        # Check if ride_id exists in result
+        if not result.get('ride_id'):
+            return jsonify({"error": "Failed to create ride"}), 500
+            
+        return jsonify(result), 201
         
     except ValueError as e:
+        print(f"Validation error in request_ride: {str(e)}")
         return jsonify({"error": str(e)}), 400
     except Exception as e:
+        print(f"Unexpected error in request_ride: {str(e)}")
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
 @ride_bp.route('/<int:ride_id>/status', methods=['GET'])

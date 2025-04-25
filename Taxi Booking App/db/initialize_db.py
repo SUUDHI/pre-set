@@ -24,6 +24,7 @@ def initialize_database():
             DROP TABLE IF EXISTS RideStatus;
             DROP TABLE IF EXISTS DriverStatus;
             DROP TABLE IF EXISTS Role;
+            DROP TABLE IF EXISTS VehicleTypes;
         """)
         
         # Create tables
@@ -46,6 +47,16 @@ def initialize_database():
                 FOREIGN KEY (RoleID) REFERENCES Role(RoleID)
             );
             
+            CREATE TABLE IF NOT EXISTS VehicleTypes (
+                VehicleTypeID INTEGER PRIMARY KEY AUTOINCREMENT,
+                Name TEXT UNIQUE NOT NULL,
+                Description TEXT,
+                BaseRate REAL NOT NULL,
+                PricePerKm REAL NOT NULL,
+                MaxPassengers INTEGER NOT NULL,
+                CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            
             CREATE TABLE IF NOT EXISTS DriverStatus (
                 StatusID INTEGER PRIMARY KEY AUTOINCREMENT,
                 Name TEXT UNIQUE NOT NULL
@@ -55,12 +66,13 @@ def initialize_database():
                 UserID INTEGER PRIMARY KEY,
                 LicenseNumber TEXT UNIQUE,
                 LicensePlate TEXT UNIQUE NOT NULL,
-                VehicleType TEXT,
+                VehicleTypeID INTEGER NOT NULL,
                 Latitude REAL,
                 Longitude REAL,
                 StatusID INTEGER DEFAULT 1,
                 FOREIGN KEY (UserID) REFERENCES Users(UserID),
-                FOREIGN KEY (StatusID) REFERENCES DriverStatus(StatusID)
+                FOREIGN KEY (StatusID) REFERENCES DriverStatus(StatusID),
+                FOREIGN KEY (VehicleTypeID) REFERENCES VehicleTypes(VehicleTypeID)
             );
             
             CREATE TABLE IF NOT EXISTS RideStatus (
@@ -72,6 +84,7 @@ def initialize_database():
                 RideID INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserID INTEGER NOT NULL,
                 DriverID INTEGER,
+                VehicleTypeID INTEGER NOT NULL,
                 StatusID INTEGER NOT NULL,
                 Fare REAL NOT NULL,
                 CancellationFee REAL DEFAULT 0.0,
@@ -85,7 +98,8 @@ def initialize_database():
                 DropoffLon REAL NOT NULL,
                 FOREIGN KEY (UserID) REFERENCES Users(UserID),
                 FOREIGN KEY (DriverID) REFERENCES Driver(UserID),
-                FOREIGN KEY (StatusID) REFERENCES RideStatus(StatusID)
+                FOREIGN KEY (StatusID) REFERENCES RideStatus(StatusID),
+                FOREIGN KEY (VehicleTypeID) REFERENCES VehicleTypes(VehicleTypeID)
             );
         """)
         
@@ -99,6 +113,12 @@ def initialize_database():
             
             INSERT INTO RideStatus (Name) VALUES 
             ('requested'), ('accepted'), ('in_progress'), ('completed'), ('cancelled');
+            
+            INSERT INTO VehicleTypes (Name, Description, BaseRate, PricePerKm, MaxPassengers) VALUES 
+            ('Sedan', '4-door car, comfortable for up to 4 passengers', 50.00, 12.00, 4),
+            ('SUV', 'Spacious vehicle, ideal for 6 passengers', 70.00, 15.00, 6),
+            ('Luxury', 'Premium vehicle with high-end amenities', 100.00, 20.00, 4),
+            ('Compact', 'Economic choice for 1-3 passengers', 40.00, 10.00, 3);
         """)
         
         conn.commit()

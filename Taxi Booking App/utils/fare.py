@@ -1,36 +1,56 @@
 from utils.distance_utils import DistanceCalculator
 from utils.coordinate import Coordinate
-from utils.constants import BASE_FARE, RATE_PER_KM, CANCELLATION_FEE_PERCENTAGE
+from utils.constants import CANCELLATION_FEE_PERCENTAGE
+from db.connect_db import DatabaseConnector
+import sqlite3
 
 class FareCalculator:
     def __init__(self):
-        # Base fare in dollars
-        self.base_fare = BASE_FARE
-        # Cost per kilometer in dollars
-        self.per_km_rate = RATE_PER_KM
-        # Cost per minute in dollars
-        self.per_minute_rate = 0.25
-        # Minimum fare in dollars
-        self.minimum_fare = BASE_FARE
-        # Surge multiplier (default 1.0)
-        self.surge_multiplier = 1.0
         # Cancellation fee percentage
         self.cancellation_fee_percentage = CANCELLATION_FEE_PERCENTAGE
         self.distance_calculator = DistanceCalculator()
 
-    def calculate_fare(self, pickup: Coordinate, dropoff: Coordinate, duration_minutes: float = 0.0, surge_multiplier: float = 1.0) -> float:
+    def _get_vehicle_rates(self, vehicle_type_id: int) -> tuple[float, float]:
         """
-        Calculate the total fare for a ride based on distance and duration.
+        Get base rate and price per km for a specific vehicle type.
+        
+        Args:
+            vehicle_type_id (int): ID of the vehicle type
+            
+        Returns:
+            tuple[float, float]: (base_rate, price_per_km)
+        """
+        conn = DatabaseConnector.get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT BaseRate, PricePerKm FROM VehicleTypes WHERE VehicleTypeID = ?",
+                (vehicle_type_id,)
+            )
+            result = cursor.fetchone()
+            if not result:
+                raise ValueError(f"Vehicle type {vehicle_type_id} not found")
+            return result[0], result[1]
+        finally:
+            conn.close()
+
+    def calculate_fare(self, pickup: Coordinate, dropoff: Coordinate, vehicle_type_id: int, duration_minutes: float = 0.0, surge_multiplier: float = 1.0) -> float:
+        """
+        Calculate the total fare for a ride based on distance, duration, and vehicle type.
         
         Args:
             pickup (Coordinate): Pickup location
             dropoff (Coordinate): Dropoff location
+            vehicle_type_id (int): ID of the vehicle type
             duration_minutes (float): Duration of the ride in minutes
             surge_multiplier (float): Current surge pricing multiplier
             
         Returns:
             float: Total fare amount
         """
+        # Get vehicle-specific rates
+        base_rate, price_per_km = self._get_vehicle_rates(vehicle_type_id)
+        
         # Calculate distance in kilometers
         distance_km = self.distance_calculator.calculate_distance(
             Coordinate(lat=pickup.lat, lng=pickup.lng),
@@ -38,17 +58,17 @@ class FareCalculator:
         )
         
         # Calculate base components
-        distance_cost = distance_km * self.per_km_rate
-        time_cost = duration_minutes * self.per_minute_rate
+        distance_cost = distance_km * price_per_km
+        time_cost = duration_minutes * 0.25  # Keep per-minute rate constant
         
         # Calculate total fare before surge
-        total_fare = self.base_fare + distance_cost + time_cost
+        total_fare = base_rate + distance_cost + time_cost
         
         # Apply surge pricing
         total_fare *= surge_multiplier
         
-        # Ensure minimum fare
-        total_fare = max(total_fare, self.minimum_fare)
+        # Ensure minimum fare is base rate
+        total_fare = max(total_fare, base_rate)
         
         return round(total_fare, 2)
 
@@ -94,19 +114,23 @@ class FareCalculator:
         else:
             return 1.0
 
-    def get_fare_breakdown(self, pickup: Coordinate, dropoff: Coordinate, duration_minutes: float = 0.0, surge_multiplier: float = 1.0) -> dict:
+    def get_fare_breakdown(self, pickup: Coordinate, dropoff: Coordinate, vehicle_type_id: int, duration_minutes: float = 0.0, surge_multiplier: float = 1.0) -> dict:
         """
         Get a detailed breakdown of the fare calculation.
         
         Args:
             pickup (Coordinate): Pickup location
             dropoff (Coordinate): Dropoff location
+            vehicle_type_id (int): ID of the vehicle type
             duration_minutes (float): Duration of the ride in minutes
             surge_multiplier (float): Current surge pricing multiplier
             
         Returns:
             dict: Detailed fare breakdown
         """
+        # Get vehicle-specific rates
+        base_rate, price_per_km = self._get_vehicle_rates(vehicle_type_id)
+        
         # Calculate distance in kilometers
         distance_km = self.distance_calculator.calculate_distance(
             Coordinate(lat=pickup.lat, lng=pickup.lng),
@@ -114,9 +138,9 @@ class FareCalculator:
         )
         
         # Calculate individual components
-        base = self.base_fare
-        distance_cost = distance_km * self.per_km_rate
-        time_cost = duration_minutes * self.per_minute_rate
+        base = base_rate
+        distance_cost = distance_km * price_per_km
+        time_cost = duration_minutes * 0.25  # Keep per-minute rate constant
         
         # Calculate subtotal
         subtotal = base + distance_cost + time_cost
@@ -125,7 +149,7 @@ class FareCalculator:
         surge_amount = (subtotal * surge_multiplier) - subtotal
         
         # Calculate final total
-        total = max(subtotal + surge_amount, self.minimum_fare)
+        total = max(subtotal + surge_amount, base_rate)
         
         return {
             "base_fare": round(base, 2),

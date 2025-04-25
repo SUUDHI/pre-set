@@ -65,7 +65,7 @@ class RideService:
         self.eta_calculator = eta_calc or ETACalculator()
         self.fare_calculator = fare_calc or FareCalculator()
 
-    def request_ride(self, user_id: int, pickup: Coordinate, dropoff: Coordinate) -> dict:
+    def request_ride(self, user_id: int, pickup: Coordinate, dropoff: Coordinate, vehicle_type_id: int, pickup_time: str = None) -> dict:
         """
         Request a new ride.
         
@@ -73,13 +73,15 @@ class RideService:
             user_id (int): ID of the user requesting the ride
             pickup (Coordinate): Pickup location
             dropoff (Coordinate): Dropoff location
+            vehicle_type_id (int): ID of the requested vehicle type
+            pickup_time (str, optional): Scheduled pickup time in ISO format. If None, immediate booking.
             
         Returns:
             dict: Ride details including fare and ETA
         """
         try:
             # Calculate fare
-            fare = self.fare_calculator.calculate_fare(pickup, dropoff)
+            fare = self.fare_calculator.calculate_fare(pickup, dropoff, vehicle_type_id)
             
             # Calculate ETA
             distance_km = self.fare_calculator.distance_calculator.calculate_distance(pickup, dropoff)
@@ -94,6 +96,8 @@ class RideService:
                 "dropoff_lon": dropoff.lng,
                 "fare": fare,
                 "status": "requested",
+                "vehicle_type_id": vehicle_type_id,
+                "pickup_time": pickup_time if pickup_time else None,  # Ensure None if no pickup time
                 "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
             
@@ -103,7 +107,9 @@ class RideService:
                 "ride_id": ride_id,
                 "fare": fare,
                 "eta": eta_formatted,
-                "status": "requested"
+                "status": "requested",
+                "vehicle_type_id": vehicle_type_id,
+                "pickup_time": pickup_time
             }
             
         except sqlite3.Error as e:
@@ -175,7 +181,7 @@ class RideService:
             dict: Updated ride details
         """
         try:
-            ride_ops.update_ride_status(ride_id, status)
+            update_ride_status(ride_id, status)
             return {"message": f"Ride status updated to {status}"}, 200
             
         except sqlite3.Error as e:
@@ -246,12 +252,13 @@ class RideService:
             if not ride:
                 return {"error": "Ride not found"}, 404
 
-            if any(ride[k] is None for k in ("pickup_lat", "pickup_lng", "drop_lat", "drop_lng")):
-                return {"error": "Missing ride coordinates"}, 400
+            if any(ride[k] is None for k in ("pickup_lat", "pickup_lng", "drop_lat", "drop_lng", "vehicle_type_id")):
+                return {"error": "Missing ride coordinates or vehicle type"}, 400
 
             fare = self.fare_calculator.calculate_fare(
                 Coordinate(ride["pickup_lat"], ride["pickup_lng"]),
-                Coordinate(ride["drop_lat"], ride["drop_lng"])
+                Coordinate(ride["drop_lat"], ride["drop_lng"]),
+                ride["vehicle_type_id"]
             )
 
             assign_driver_to_ride(driver_id, ride_id, fare)

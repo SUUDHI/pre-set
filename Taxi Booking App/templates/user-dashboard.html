@@ -182,20 +182,28 @@
                 <h2>Book a Ride</h2>
                 <form id="bookingForm">
                     <div class="form-group">
-                        <label>Pickup Location</label>
-                        <div class="location-inputs">
-                            <input type="number" id="pickupLat" name="pickup_lat" placeholder="Latitude" step="any" required>
-                            <input type="number" id="pickupLon" name="pickup_lon" placeholder="Longitude" step="any" required>
+                        <div class="input-group">
+                            <label for="pickupLat">Pickup Location</label>
+                            <input type="number" id="pickupLat" step="any" placeholder="Latitude" required>
+                            <input type="number" id="pickupLon" step="any" placeholder="Longitude" required>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Dropoff Location</label>
-                        <div class="location-inputs">
-                            <input type="number" id="dropoffLat" name="dropoff_lat" placeholder="Latitude" step="any" required>
-                            <input type="number" id="dropoffLon" name="dropoff_lon" placeholder="Longitude" step="any" required>
+                        <div class="input-group">
+                            <label for="dropoffLat">Dropoff Location</label>
+                            <input type="number" id="dropoffLat" step="any" placeholder="Latitude" required>
+                            <input type="number" id="dropoffLon" step="any" placeholder="Longitude" required>
                         </div>
+                        <div class="input-group">
+                            <label for="vehicleType">Vehicle Type</label>
+                            <select id="vehicleType" required>
+                                <!-- Vehicle types will be loaded dynamically -->
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="pickupTime">Pickup Time (leave empty for immediate booking)</label>
+                            <input type="datetime-local" id="pickupTime">
+                        </div>
+                        <button type="submit" class="btn-primary">Book Now</button>
                     </div>
-                    <button type="submit" class="btn-primary">Book Now</button>
                 </form>
             </div>
 
@@ -208,6 +216,7 @@
                             <tr>
                                 <th>Ride ID</th>
                                 <th>Status</th>
+                                <th>Vehicle Type</th>
                                 <th>Pickup</th>
                                 <th>Dropoff</th>
                                 <th>Fare</th>

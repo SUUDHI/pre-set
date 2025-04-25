@@ -78,6 +78,10 @@ class DriverValidator(UserValidator):
         if not self._validate_date_of_birth(data.get('birth')):
             return False, "Driver must be at least 18 years old"
 
+        # Validate vehicle type
+        if not data.get('vehicleTypeId') or not isinstance(data['vehicleTypeId'], int):
+            return False, "vehicleTypeId must be an integer"
+
         return True, ""
 
     def _validate_date_of_birth(self, date_str: str) -> bool:
