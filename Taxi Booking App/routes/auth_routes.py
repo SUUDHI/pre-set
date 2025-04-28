@@ -39,11 +39,14 @@ def register():
 def login():
     data = request.get_json()
     
-    if not data or not data.get("email") or not data.get("password"):
-        return jsonify({"error": "Email and password are required"}), 400
+    if not data or not data.get("email") or not data.get("password") or not data.get("role"):
+        return jsonify({"error": "Email, password, and role are required"}), 400
     
     try:
-        response, status = auth_service.login_user(data["email"], data["password"])
+        if data["role"] == "driver":
+            response, status = driver_service.login_driver(data["email"], data["password"])
+        else:
+            response, status = auth_service.login_user(data["email"], data["password"], data["role"])
         return jsonify(response), status
     except Exception as e:
         return jsonify({"error": str(e)}), 500

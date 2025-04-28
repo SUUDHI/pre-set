@@ -351,3 +351,61 @@ def get_ride_requests_by_vehicle_type(driver_id: int, vehicle_type_id: int) -> L
         raise e
     finally:
         conn.close()
+
+
+class DriverOps:
+    def __init__(self):
+        pass
+
+    def get_driver_status(self, driver_id):
+        conn = None
+        try:
+            conn = DatabaseConnector.get_connection()
+            cursor = conn.cursor()
+            query = """
+                SELECT ds.Name as status
+                FROM Driver d
+                JOIN DriverStatus ds ON d.StatusID = ds.StatusID
+                WHERE d.UserID = ?
+            """
+            cursor.execute(query, (driver_id,))
+            result = cursor.fetchone()
+            return result['status'] if result else None
+        except Exception as e:
+            print(f"Error getting driver status: {str(e)}")
+            raise
+        finally:
+            if conn:
+                conn.close()
+
+    def update_driver_status(self, driver_id, new_status):
+        conn = None
+        try:
+            conn = DatabaseConnector.get_connection()
+            cursor = conn.cursor()
+            
+            # Convert status to lowercase for case-insensitive matching
+            new_status_lower = new_status.lower()
+            
+            # First get the StatusID for the new status
+            status_query = "SELECT StatusID FROM DriverStatus WHERE LOWER(Name) = ?"
+            cursor.execute(status_query, (new_status_lower,))
+            status_result = cursor.fetchone()
+            
+            if not status_result:
+                raise ValueError(f"Invalid status: {new_status}. Valid statuses are: offline, available, busy")
+            
+            status_id = status_result['StatusID']
+            
+            # Update the driver's status
+            update_query = "UPDATE Driver SET StatusID = ? WHERE UserID = ?"
+            cursor.execute(update_query, (status_id, driver_id))
+            conn.commit()
+        except Exception as e:
+            if conn:
+                conn.rollback()
+            print(f"Error updating driver status: {str(e)}")
+            raise
+        finally:
+            if conn:
+                conn.close()

@@ -70,6 +70,7 @@ def initialize_database():
                 Latitude REAL,
                 Longitude REAL,
                 StatusID INTEGER DEFAULT 1,
+                LastStatusUpdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (UserID) REFERENCES Users(UserID),
                 FOREIGN KEY (StatusID) REFERENCES DriverStatus(StatusID),
                 FOREIGN KEY (VehicleTypeID) REFERENCES VehicleTypes(VehicleTypeID)
@@ -86,7 +87,7 @@ def initialize_database():
                 DriverID INTEGER,
                 VehicleTypeID INTEGER NOT NULL,
                 StatusID INTEGER NOT NULL,
-                Fare REAL NOT NULL,
+                Fare REAL,
                 CancellationFee REAL DEFAULT 0.0,
                 CancellationReason TEXT,
                 RequestedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -101,24 +102,32 @@ def initialize_database():
                 FOREIGN KEY (StatusID) REFERENCES RideStatus(StatusID),
                 FOREIGN KEY (VehicleTypeID) REFERENCES VehicleTypes(VehicleTypeID)
             );
+
+            -- Create indexes for better query performance
+            CREATE INDEX IF NOT EXISTS idx_users_email ON Users(Email);
+            CREATE INDEX IF NOT EXISTS idx_users_phone ON Users(Phone);
+            CREATE INDEX IF NOT EXISTS idx_driver_status ON Driver(StatusID);
+            CREATE INDEX IF NOT EXISTS idx_rides_status ON Rides(StatusID);
+            CREATE INDEX IF NOT EXISTS idx_rides_driver ON Rides(DriverID);
         """)
         
-        # Insert default values
+        # Insert default values with specific IDs to match your database
         cursor.executescript("""
-            INSERT INTO Role (Name) VALUES 
-            ('admin'), ('driver'), ('user');
+            INSERT INTO Role (RoleID, Name) VALUES 
+            (1, 'admin'), (2, 'driver'), (3, 'user');
             
-            INSERT INTO DriverStatus (Name) VALUES 
-            ('offline'), ('available'), ('busy');
+            INSERT INTO DriverStatus (StatusID, Name) VALUES 
+            (1, 'offline'), (2, 'available'), (3, 'busy');
             
-            INSERT INTO RideStatus (Name) VALUES 
-            ('requested'), ('accepted'), ('in_progress'), ('completed'), ('cancelled');
+            INSERT INTO RideStatus (StatusID, Name) VALUES 
+            (1, 'requested'), (2, 'accepted'), (3, 'in_progress'), 
+            (4, 'completed'), (5, 'cancelled');
             
-            INSERT INTO VehicleTypes (Name, Description, BaseRate, PricePerKm, MaxPassengers) VALUES 
-            ('Sedan', '4-door car, comfortable for up to 4 passengers', 50.00, 12.00, 4),
-            ('SUV', 'Spacious vehicle, ideal for 6 passengers', 70.00, 15.00, 6),
-            ('Luxury', 'Premium vehicle with high-end amenities', 100.00, 20.00, 4),
-            ('Compact', 'Economic choice for 1-3 passengers', 40.00, 10.00, 3);
+            INSERT INTO VehicleTypes (VehicleTypeID, Name, Description, BaseRate, PricePerKm, MaxPassengers) VALUES 
+            (1, 'Sedan', '4-door car, comfortable for up to 4 passengers', 50.00, 12.00, 4),
+            (2, 'SUV', 'Spacious vehicle, ideal for 6 passengers', 70.00, 15.00, 6),
+            (3, 'Luxury', 'Premium vehicle with high-end amenities', 100.00, 20.00, 4),
+            (4, 'Compact', 'Economic choice for 1-3 passengers', 40.00, 10.00, 3);
         """)
         
         conn.commit()

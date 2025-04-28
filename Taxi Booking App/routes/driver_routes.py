@@ -3,10 +3,13 @@ from services.driver_service import DriverService
 from services.validators import DriverValidator
 from utils.jwt_handler import jwt_handler
 from db.connect_db import DatabaseConnector
+from utils.auth import token_required
+from db_operations.driver_ops import DriverOps
 
 driver_bp = Blueprint("driver", __name__)
 driver_service = DriverService()
 driver_validator = DriverValidator()
+driver_ops = DriverOps()
 
 @driver_bp.route("/register", methods=["POST"])
 def register_driver():
@@ -46,22 +49,53 @@ def update_driver_location():
     response, status = driver_service.update_location(g.user_id, latitude, longitude)
     return jsonify(response), status
 
+@driver_bp.route("/status", methods=["GET"])
+@jwt_handler.token_required(role="driver")
+def get_driver_status():
+    try:
+        driver_id = g.user_id
+        if not driver_id:
+            return jsonify({'error': 'Invalid driver credentials'}), 401
+            
+        status = driver_ops.get_driver_status(driver_id)
+        
+        if status is None:
+            return jsonify({'error': 'Driver not found'}), 404
+            
+        return jsonify({
+            'status': status,
+            'driver_id': driver_id
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @driver_bp.route("/status", methods=["PUT"])
 @jwt_handler.token_required(role="driver")
 def update_driver_status():
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Invalid JSON format"}), 400
-
-    status = data.get("status")
-    if not status:
-        return jsonify({"error": "Status is required"}), 400
+    try:
+        driver_id = g.user_id
+        if not driver_id:
+            return jsonify({'error': 'Invalid driver credentials'}), 401
+            
+        data = request.get_json()
+        if not data or 'status' not in data:
+            return jsonify({'error': 'Status is required'}), 400
+            
+        new_status = data['status'].upper()
+        valid_statuses = ['AVAILABLE', 'BUSY', 'OFFLINE']
         
-    if status not in ["available", "busy", "offline"]:
-        return jsonify({"error": "Invalid status. Must be one of: available, busy, offline"}), 400
+        if new_status not in valid_statuses:
+            return jsonify({'error': f'Invalid status. Must be one of: {", ".join(valid_statuses)}'}), 400
 
-    response, status_code = driver_service.update_status(g.user_id, status)
-    return jsonify(response), status_code
+        driver_ops.update_driver_status(driver_id, new_status)
+        
+        return jsonify({
+            'message': 'Status updated successfully',
+            'status': new_status,
+            'driver_id': driver_id
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @driver_bp.route("/rides/<int:ride_id>/accept", methods=["POST"])
 @jwt_handler.token_required(role="driver")

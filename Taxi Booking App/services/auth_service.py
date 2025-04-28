@@ -66,7 +66,7 @@ class AuthService:
         except Exception as e:
             return {"error": f"Unexpected error: {str(e)}"}, 500
 
-    def login_user(self, email: str, password: str) -> Tuple[Dict[str, Any], int]:
+    def login_user(self, email: str, password: str, role: str) -> Tuple[Dict[str, Any], int]:
         try:
             user = user_ops.get_user_by_email(email)
             if not user:
@@ -75,6 +75,10 @@ class AuthService:
             # Verify password
             if not self.password_hasher.verify_password(password, user['Password']):
                 return {"error": "Invalid credentials"}, 401
+
+            # Verify role
+            if user["Role"] != role:
+                return {"error": f"This email is registered as a {user['Role']}, not as a {role}"}, 401
 
             # Generate token using the new jwt_handler
             payload = {

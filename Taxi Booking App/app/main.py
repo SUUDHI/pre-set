@@ -3,6 +3,7 @@ from flask_cors import CORS
 from routes.auth_routes import auth_bp
 from routes.ride_routes import ride_bp
 from routes.driver_routes import driver_bp
+from utils.socket_handler import socketio
 import os
 
 class TaxiApp:
@@ -19,6 +20,9 @@ class TaxiApp:
             
         self.register_blueprints()
         self.register_routes()
+        
+        # Initialize SocketIO with threading mode
+        socketio.init_app(self.app, async_mode='threading')
 
     def register_blueprints(self):
         self.app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -40,4 +44,4 @@ class TaxiApp:
 
 if __name__ == "__main__":
     app = TaxiApp().app
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)

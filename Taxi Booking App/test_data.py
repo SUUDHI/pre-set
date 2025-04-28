@@ -76,7 +76,7 @@ drivers = [
         "name": "John Sedan",
         "email": "john.sedan@example.com",
         "phone": "+1234567890",
-        "password": "password123",
+        "password": "sk12345678",
         "birth": "1990-01-01",
         "gender": "male",
         "licensePlate": "SED123",
@@ -87,7 +87,7 @@ drivers = [
         "name": "Sarah SUV",
         "email": "sarah.suv@example.com",
         "phone": "+1234567891",
-        "password": "password123",
+        "password": "sk12345678",
         "birth": "1992-02-02",
         "gender": "female",
         "licensePlate": "SUV456",
@@ -98,7 +98,7 @@ drivers = [
         "name": "Mike Luxury",
         "email": "mike.luxury@example.com",
         "phone": "+1234567892",
-        "password": "password123",
+        "password": "sk12345678",
         "birth": "1985-03-03",
         "gender": "male",
         "licensePlate": "LUX789",
@@ -109,19 +109,19 @@ drivers = [
 
 users = [
     {
-        "name": "User One",
-        "email": "user1@example.com",
+        "name": "garima",
+        "email": "garima@gmail.com",
         "phone": "+9876543210",
-        "password": "password123",
+        "password": "sk12345678",
         "birth": "1995-01-01",
         "gender": "male",
         "role": "user"
     },
     {
-        "name": "User Two",
-        "email": "user2@example.com",
+        "name": "solani",
+        "email": "solani@gmail.com.com",
         "phone": "+9876543211",
-        "password": "password123",
+        "password": "sk12345678",
         "birth": "1995-02-02",
         "gender": "female",
         "role": "user"
@@ -145,8 +145,8 @@ print("\nLogging in as user...")
 login_response = requests.post(
     f"{BASE_URL}/auth/login",
     json={
-        "email": "user1@example.com",
-        "password": "password123"
+        "email": "solani@gmail.com.com",
+        "password": "sk12345678"
     }
 )
 user_token = login_response.json().get("token")

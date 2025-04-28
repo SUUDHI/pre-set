@@ -1,5 +1,5 @@
 let currentRideId = null;
-let selectedReason = null;
+let selectedReason = '';
 
 // Format currency
 function formatCurrency(amount) {
@@ -17,80 +17,126 @@ function formatLocation(lat, lon) {
 }
 
 // Format datetime for display
-function formatDateTime(isoString) {
-    if (!isoString) return 'Immediate';
-    const date = new Date(isoString);
-    return date.toLocaleString();
+function formatDateTime(dateStr) {
+    if (!dateStr) return '🕒 Immediate';
+    const date = new Date(dateStr);
+    return '🕒 ' + date.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
 }
 
 // Load ride history
 async function loadRideHistory() {
     try {
-        const response = await fetch('http://localhost:5000/ride/history', {
+        const response = await fetch('/ride/history', {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
 
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
+        console.log('Ride history data:', data); // Debug log
+        
         const tableBody = document.getElementById('ridesTableBody');
         
-        if (response.ok && data.rides) {
+        if (data.rides && data.rides.length > 0) {
             tableBody.innerHTML = data.rides.map(ride => {
-                // Convert status to uppercase for consistent comparison
-                const status = ride.Status.toUpperCase();
-                const isCancelled = status === 'CANCELLED';
+                console.log('Processing ride:', ride); // Debug log
                 
-                // Format fees
+                // Format fees with null checks
                 const fareDisplay = formatCurrency(ride.Fare);
                 const cancellationFeeDisplay = formatCurrency(ride.CancellationFee);
 
-                // Format driver info
-                const driverInfo = ride.DriverID ? `
+                // Format driver info with null checks
+                const driverInfo = (ride.DriverID && ride.DriverName) ? `
                     <div class="driver-info">
                         <span class="driver-name">${ride.DriverName}</span>
-                        <span class="driver-phone">${ride.DriverPhone}</span>
+                        <span class="driver-phone">${ride.DriverPhone || 'N/A'}</span>
                     </div>
                 ` : '';
 
-                // Format pickup time
+                // Format pickup time with null check
                 const pickupTimeDisplay = formatDateTime(ride.PickupTime);
                 
+                // Format coordinates
+                const pickupLocation = formatLocation(ride.PickupLat, ride.PickupLon);
+                const dropoffLocation = formatLocation(ride.DropoffLat, ride.DropoffLon);
+                
+                // Get status and ensure it's lowercase for CSS classes
+                const statusText = ride.Status || 'Unknown';
+                const statusClass = statusText.toLowerCase();
+                
                 return `
-                    <tr>
+                    <tr id="ride-${ride.RideID}">
                         <td>#${ride.RideID}</td>
                         <td>
-                            <span class="status-badge status-${status.toLowerCase()}">
-                                ${status}
+                            <span class="status-badge status-${statusClass}">
+                                ${statusText}
                             </span>
-                            ${isCancelled && ride.CancellationReason ? `
-                                <div class="cancellation-reason">
-                                    Reason: ${ride.CancellationReason}
-                                </div>
-                            ` : ''}
                             <div class="pickup-time">
-                                Pickup: ${pickupTimeDisplay}
+                                ${pickupTimeDisplay}
                             </div>
                         </td>
                         <td>${ride.VehicleType || 'Standard'}</td>
-                        <td class="location-cell" title="${formatLocation(ride.PickupLat, ride.PickupLon)}">
-                            ${formatLocation(ride.PickupLat, ride.PickupLon)}
-                        </td>
-                        <td class="location-cell" title="${formatLocation(ride.DropoffLat, ride.DropoffLon)}">
-                            ${formatLocation(ride.DropoffLat, ride.DropoffLon)}
-                        </td>
-                        <td class="fee-cell ${isCancelled ? 'fee-cancelled' : 'fee-normal'}">
-                            ${fareDisplay}
-                        </td>
-                        <td class="fee-cell ${isCancelled ? 'fee-cancelled' : ''}">
-                            ${isCancelled ? cancellationFeeDisplay : '-'}
-                        </td>
+                        <td>${pickupLocation}</td>
+                        <td>${dropoffLocation}</td>
+                        <td>${fareDisplay}</td>
+                        <td>${cancellationFeeDisplay}</td>
                         <td>
-                            ${status === 'REQUESTED' ? `
-                                <button onclick="showCancelModal(${ride.RideID})" class="btn-danger">
-                                    Cancel Ride
-                                </button>
-                            ` : status === 'ACCEPTED' ? `
+                            ${statusText.toLowerCase() === 'requested' ? `
+                                <div class="action-container">
+                                    <button onclick="toggleCancelForm(${ride.RideID})" class="btn-danger">
+                                        Cancel Ride
+                                    </button>
+                                    <div id="cancel-form-${ride.RideID}" class="cancel-form" style="display: none;">
+                                        <div class="cancel-modal">
+                                            <div class="modal-header">
+                                                <h3>Cancel Ride</h3>
+                                                <button class="close-button" onclick="toggleCancelForm(${ride.RideID})">&times;</button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Please select a reason for cancellation:</p>
+                                                <div class="cancellation-reasons">
+                                                    <label class="reason-option">
+                                                        <input type="radio" name="reason-${ride.RideID}" value="Changed my plans">
+                                                        Changed my plans
+                                                    </label>
+                                                    <label class="reason-option">
+                                                        <input type="radio" name="reason-${ride.RideID}" value="Driver taking too long">
+                                                        Driver taking too long
+                                                    </label>
+                                                    <label class="reason-option">
+                                                        <input type="radio" name="reason-${ride.RideID}" value="Booked by mistake">
+                                                        Booked by mistake
+                                                    </label>
+                                                    <label class="reason-option">
+                                                        <input type="radio" name="reason-${ride.RideID}" value="Wrong location entered">
+                                                        Wrong location entered
+                                                    </label>
+                                                    <label class="reason-option">
+                                                        <input type="radio" name="reason-${ride.RideID}" value="Other">
+                                                        Other
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button class="btn-confirm" onclick="confirmCancellation(${ride.RideID})">
+                                                    Confirm Cancellation
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : statusText.toLowerCase() === 'accepted' ? `
                                 <div class="driver-assigned">
                                     <span class="status-badge status-accepted">Driver Assigned</span>
                                     ${driverInfo}
@@ -101,30 +147,137 @@ async function loadRideHistory() {
                 `;
             }).join('');
         } else {
-            throw new Error(data.error || 'Failed to load rides');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="error-message">
+                        No ride history available. Book a ride to get started!
+                    </td>
+                </tr>
+            `;
         }
     } catch (error) {
-        console.error('Error loading rides:', error);
+        console.error('Error loading ride history:', error);
+        const tableBody = document.getElementById('ridesTableBody');
         tableBody.innerHTML = `
             <tr>
-                <td colspan="8" style="text-align: center; padding: 20px;">
-                    Failed to load ride history. Please try again later.
+                <td colspan="8" class="error-message">
+                    Failed to load ride history. Please try again later. Error: ${error.message}
                 </td>
             </tr>
         `;
     }
 }
 
+function toggleCancelForm(rideId) {
+    const form = document.getElementById(`cancel-form-${rideId}`);
+    if (form) {
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+function createCancelForm(rideId) {
+    return `
+        <div id="cancel-form-${rideId}" class="cancel-form" style="display: none;">
+            <div class="cancel-modal">
+                <div class="modal-header">
+                    <h3>Cancel Ride</h3>
+                    <button class="close-button" onclick="toggleCancelForm(${rideId})">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Please select a reason for cancellation:</p>
+                    <div class="cancellation-reasons">
+                        <label class="reason-option">
+                            <input type="radio" name="reason-${rideId}" value="Changed my plans">
+                            Changed my plans
+                        </label>
+                        <label class="reason-option">
+                            <input type="radio" name="reason-${rideId}" value="Driver taking too long">
+                            Driver taking too long
+                        </label>
+                        <label class="reason-option">
+                            <input type="radio" name="reason-${rideId}" value="Booked by mistake">
+                            Booked by mistake
+                        </label>
+                        <label class="reason-option">
+                            <input type="radio" name="reason-${rideId}" value="Wrong location entered">
+                            Wrong location entered
+                        </label>
+                        <label class="reason-option">
+                            <input type="radio" name="reason-${rideId}" value="Other">
+                            Other
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-confirm" onclick="confirmCancellation(${rideId})">
+                        Confirm Cancellation
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+async function confirmCancellation(rideId) {
+    const selectedReason = document.querySelector(`input[name="reason-${rideId}"]:checked`);
+    
+    if (!selectedReason) {
+        alert('Please select a cancellation reason');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/ride/${rideId}/cancel`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+                cancellation_reason: selectedReason.value
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to cancel ride');
+        }
+
+        const data = await response.json();
+        alert('Ride cancelled successfully');
+        toggleCancelForm(rideId); // Hide the cancellation form
+        loadRideHistory(); // Refresh ride history
+    } catch (error) {
+        console.error('Error cancelling ride:', error);
+        alert(error.message || 'Failed to cancel ride. Please try again.');
+    }
+}
+
+// Load user email
+async function loadUserEmail() {
+    try {
+        const response = await fetch('/auth/user-info', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        const data = await response.json();
+        document.getElementById('userEmail').textContent = data.email;
+    } catch (error) {
+        console.error('Error loading user info:', error);
+    }
+}
+
 // Load vehicle types
 async function loadVehicleTypes() {
     try {
-        const response = await fetch('http://localhost:5000/driver/vehicle-types');
+        const response = await fetch('/driver/vehicle-types');
         const data = await response.json();
         
         if (response.ok && data) {
             const vehicleTypeSelect = document.getElementById('vehicleType');
             vehicleTypeSelect.innerHTML = data.map(type => `
-                <option value="${type.id}">${type.name} - ${type.description} (₹${type.baseRate} base + ₹${type.pricePerKm}/km)</option>
+                <option value="${type.id}">${type.name} - ${type.description}</option>
             `).join('');
         } else {
             throw new Error(data.error || 'Failed to load vehicle types');
@@ -135,135 +288,52 @@ async function loadVehicleTypes() {
     }
 }
 
-// Book a new ride
-document.getElementById('bookingForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+// Logout function
+function logout() {
+    localStorage.removeItem('token');
+    window.location.href = '/';
+}
+
+// Initialize the page
+document.addEventListener('DOMContentLoaded', () => {
+    loadUserEmail();
+    loadRideHistory();
+    loadVehicleTypes();
     
-    const formData = {
-        pickup_lat: parseFloat(document.getElementById('pickupLat').value),
-        pickup_lon: parseFloat(document.getElementById('pickupLon').value),
-        dropoff_lat: parseFloat(document.getElementById('dropoffLat').value),
-        dropoff_lon: parseFloat(document.getElementById('dropoffLon').value),
-        vehicle_type_id: parseInt(document.getElementById('vehicleType').value)
-    };
+    // Handle booking form submission
+    document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = {
+            pickup_lat: document.getElementById('pickupLat').value,
+            pickup_lon: document.getElementById('pickupLon').value,
+            dropoff_lat: document.getElementById('dropoffLat').value,
+            dropoff_lon: document.getElementById('dropoffLon').value,
+            vehicle_type_id: document.getElementById('vehicleType').value,
+            pickup_time: document.getElementById('pickupTime').value || null
+        };
 
-    // Add pickup time if specified
-    const pickupTimeInput = document.getElementById('pickupTime').value;
-    if (pickupTimeInput) {
-        // Convert local datetime to ISO string
-        const pickupDate = new Date(pickupTimeInput);
-        formData.pickup_time = pickupDate.toISOString();
-    }
-
-    try {
-        const response = await fetch('http://localhost:5000/ride/request', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify(formData)
-        });
-
-        const data = await response.json();
-        
-        if (response.ok && data.ride_id) {
-            alert('Ride booked successfully!');
-            e.target.reset();
-            await loadRideHistory(); // Wait for ride history to reload
-        } else {
-            alert(data.error || 'Failed to book ride. Please try again.');
-            console.error('Booking error:', data);
+        try {
+            const response = await fetch('/ride/request', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(formData)
+            });
+            const data = await response.json();
+            if (response.ok) {
+                alert('Ride booked successfully!');
+                loadRideHistory();
+            } else {
+                alert(data.error || 'Failed to book ride');
+            }
+        } catch (error) {
+            console.error('Error booking ride:', error);
+            alert('Failed to book ride');
         }
-    } catch (error) {
-        console.error('Error booking ride:', error);
-        alert('An error occurred while booking the ride. Please try again.');
-    }
+    });
 });
-
-// Show cancel modal
-function showCancelModal(rideId) {
-    currentRideId = rideId;
-    document.getElementById('cancelModal').style.display = 'block';
-    // Reset selections
-    selectedReason = null;
-    document.querySelectorAll('.reason-item').forEach(item => item.classList.remove('selected'));
-    document.getElementById('otherReasonGroup').style.display = 'none';
-    document.getElementById('otherReason').value = '';
-}
-
-// Close cancel modal
-function closeCancelModal() {
-    document.getElementById('cancelModal').style.display = 'none';
-    currentRideId = null;
-    selectedReason = null;
-}
-
-// Select a reason
-function selectReason(element, reason) {
-    // Remove selected class from all items
-    document.querySelectorAll('.reason-item').forEach(item => item.classList.remove('selected'));
-    // Add selected class to clicked item
-    element.classList.add('selected');
-    selectedReason = reason;
-    
-    // Show/hide other reason input
-    const otherReasonGroup = document.getElementById('otherReasonGroup');
-    if (reason === 'Other') {
-        otherReasonGroup.style.display = 'block';
-    } else {
-        otherReasonGroup.style.display = 'none';
-    }
-}
-
-// Confirm cancellation
-async function confirmCancellation() {
-    if (!selectedReason) {
-        alert('Please select a cancellation reason');
-        return;
-    }
-
-    let finalReason = selectedReason;
-    if (selectedReason === 'Other') {
-        const otherReason = document.getElementById('otherReason').value.trim();
-        if (!otherReason) {
-            alert('Please specify the other reason');
-            return;
-        }
-        finalReason = otherReason;
-    }
-
-    try {
-        const response = await fetch(`http://localhost:5000/ride/${currentRideId}/cancel`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({
-                cancellation_reason: finalReason
-            })
-        });
-
-        const data = await response.json();
-        
-        if (response.ok) {
-            alert('Ride cancelled successfully');
-            closeCancelModal();
-            loadRideHistory();
-        } else {
-            alert(data.error || 'Failed to cancel ride');
-        }
-    } catch (error) {
-        alert('An error occurred while cancelling the ride');
-    }
-}
-
-// Load ride history on page load
-loadRideHistory();
-
-// Load vehicle types on page load
-loadVehicleTypes();
 
 // Refresh ride history every 30 seconds
 setInterval(loadRideHistory, 30000); 

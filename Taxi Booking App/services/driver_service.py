@@ -96,6 +96,10 @@ class DriverService:
             if not self.password_hasher.verify_password(password, driver['Password']):
                 return {"error": "Invalid credentials"}, 401
 
+            # Verify role
+            if driver["Role"] != "driver":
+                return {"error": "This email is not registered as a driver"}, 401
+
             # Generate token using the new jwt_handler
             payload = {
                 "user_id": driver["DriverID"],

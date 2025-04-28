@@ -180,13 +180,20 @@ document.getElementById('locationForm').addEventListener('submit', async (e) => 
 // Update driver status
 document.getElementById('driverStatus').addEventListener('change', async (e) => {
     const status = e.target.value;
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        alert('Please login again');
+        window.location.href = '/';
+        return;
+    }
 
     try {
         const response = await fetch('/driver/status', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ status })
         });
@@ -196,7 +203,12 @@ document.getElementById('driverStatus').addEventListener('change', async (e) => 
         if (response.ok) {
             alert('Status updated successfully');
         } else {
-            alert(data.error || 'Failed to update status');
+            if (response.status === 401) {
+                alert('Session expired. Please login again.');
+                window.location.href = '/';
+            } else {
+                alert(data.error || 'Failed to update status');
+            }
         }
     } catch (error) {
         console.error('Error updating status:', error);
@@ -206,10 +218,17 @@ document.getElementById('driverStatus').addEventListener('change', async (e) => 
 
 // Fetch driver's current status
 async function loadDriverStatus() {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+        console.error('No token found');
+        return;
+    }
+
     try {
         const response = await fetch('/driver/status', {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`
             }
         });
 
@@ -217,6 +236,9 @@ async function loadDriverStatus() {
         
         if (response.ok && data.status) {
             document.getElementById('driverStatus').value = data.status.toLowerCase();
+        } else if (response.status === 401) {
+            alert('Session expired. Please login again.');
+            window.location.href = '/';
         }
     } catch (error) {
         console.error('Error loading driver status:', error);

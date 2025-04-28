@@ -46,14 +46,21 @@ function clearRegistrationForm() {
 function toggleRegistrationFields() {
     const role = document.getElementById('reg-role').value;
     const driverFields = document.getElementById('driver-fields');
-    const driverInputs = driverFields.querySelectorAll('input, select');
+    const driverInputs = document.querySelectorAll('.driver-field');
     
     if (role === 'driver') {
         driverFields.style.display = 'block';
-        driverInputs.forEach(input => input.required = true);
+        driverInputs.forEach(input => {
+            input.required = true;
+            input.disabled = false;
+        });
     } else {
         driverFields.style.display = 'none';
-        driverInputs.forEach(input => input.required = false);
+        driverInputs.forEach(input => {
+            input.required = false;
+            input.disabled = true;
+            input.value = ''; // Clear the values
+        });
     }
 }
 
@@ -123,9 +130,19 @@ if (document.getElementById('registerForm')) {
         
         // Add driver-specific fields if role is driver
         if (formData.role === 'driver') {
-            formData.licensePlate = document.getElementById('reg-plate').value;
-            formData.licenseNumber = document.getElementById('reg-license').value;
-            formData.vehicleTypeId = parseInt(document.getElementById('reg-vehicle-type').value);
+            const vehicleType = document.getElementById('reg-vehicle-type').value;
+            const licensePlate = document.getElementById('reg-plate').value;
+            const licenseNumber = document.getElementById('reg-license').value;
+            
+            // Validate driver-specific fields
+            if (!vehicleType || !licensePlate || !licenseNumber) {
+                document.getElementById('error-message').textContent = 'Please fill in all driver-specific fields';
+                return;
+            }
+            
+            formData.vehicleTypeId = parseInt(vehicleType);
+            formData.licensePlate = licensePlate;
+            formData.licenseNumber = licenseNumber;
         }
         
         try {
@@ -145,15 +162,15 @@ if (document.getElementById('registerForm')) {
                 
                 // Show success message and switch to login form
                 document.getElementById('error-message').textContent = 'Registration successful! Please login.';
-                document.getElementById('error-message').style.color = 'var(--success-color)';
+                document.getElementById('error-message').style.color = 'green';
                 setTimeout(() => toggleAuth('login'), 2000);
             } else {
                 document.getElementById('error-message').textContent = data.error || 'Registration failed';
-                document.getElementById('error-message').style.color = 'var(--danger-color)';
+                document.getElementById('error-message').style.color = 'red';
             }
         } catch (error) {
             document.getElementById('error-message').textContent = 'An error occurred during registration';
-            document.getElementById('error-message').style.color = 'var(--danger-color)';
+            document.getElementById('error-message').style.color = 'red';
         }
     });
 }
