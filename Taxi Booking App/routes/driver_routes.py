@@ -142,6 +142,45 @@ def get_requested_rides():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@driver_bp.route("/rides/assigned", methods=["GET"])
+@jwt_handler.token_required(role="driver")
+def get_assigned_rides():
+    """Get all rides assigned to the driver"""
+    try:
+        conn = DatabaseConnector.get_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT 
+                r.RideID,
+                r.UserID,
+                r.PickupLat,
+                r.PickupLon,
+                r.DropoffLat,
+                r.DropoffLon,
+                r.Fare,
+                r.RequestedAt,
+                r.PickupTime,
+                rs.Name as Status,
+                u.Name as UserName,
+                u.Phone as UserPhone
+            FROM Rides r
+            JOIN Users u ON r.UserID = u.UserID
+            JOIN RideStatus rs ON r.StatusID = rs.StatusID
+            WHERE r.DriverID = ?
+            AND rs.Name IN ('accepted', 'in_progress')
+            ORDER BY r.RequestedAt DESC
+        """, (g.user_id,))
+        
+        rides = cursor.fetchall()
+        return jsonify([dict(ride) for ride in rides]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if 'conn' in locals():
+            conn.close()
+
 @driver_bp.route("/vehicle-types", methods=["GET"])
 def get_vehicle_types():
     """Get all available vehicle types"""
@@ -174,6 +213,118 @@ def get_vehicle_types():
             
         return jsonify(vehicle_types), 200
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if 'conn' in locals():
+            conn.close()
+
+@driver_bp.route("/rides/<int:ride_id>/complete", methods=["POST"])
+@jwt_handler.token_required(role="driver")
+def complete_ride(ride_id):
+    """Complete a ride by updating its status and driver's location"""
+    try:
+        # Get the driver's current location from request
+        data = request.get_json()
+        if not data or 'latitude' not in data or 'longitude' not in data:
+            return jsonify({"error": "Current location (latitude, longitude) is required"}), 400
+
+        response, status = driver_service.complete_ride(
+            driver_id=g.user_id,
+            ride_id=ride_id,
+            dropoff_lat=data['latitude'],
+            dropoff_lon=data['longitude']
+        )
+        return jsonify(response), status
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@driver_bp.route("/rides/<int:ride_id>/start", methods=["POST"])
+@jwt_handler.token_required(role="driver")
+def start_ride(ride_id):
+    """Start a ride by changing its status to in_progress"""
+    try:
+        conn = DatabaseConnector.get_connection()
+        cursor = conn.cursor()
+        
+        # Verify the ride exists and belongs to this driver
+        cursor.execute("""
+            SELECT r.RideID, r.StatusID, rs.Name as Status
+            FROM Rides r
+            JOIN RideStatus rs ON r.StatusID = rs.StatusID
+            WHERE r.RideID = ? AND r.DriverID = ?
+        """, (ride_id, g.user_id))
+        
+        ride = cursor.fetchone()
+        if not ride:
+            return jsonify({"error": "Ride not found or not assigned to you"}), 404
+            
+        if ride[2] != 'accepted':
+            return jsonify({"error": "Only accepted rides can be started"}), 400
+            
+        # Update ride status to in_progress
+        cursor.execute("""
+            UPDATE Rides 
+            SET StatusID = (SELECT StatusID FROM RideStatus WHERE Name = 'in_progress'),
+                PickupTime = CURRENT_TIMESTAMP
+            WHERE RideID = ?
+        """, (ride_id,))
+        
+        conn.commit()
+        return jsonify({"message": "Ride started successfully"}), 200
+        
+    except Exception as e:
+        if 'conn' in locals():
+            conn.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if 'conn' in locals():
+            conn.close()
+
+@driver_bp.route("/rides/<int:ride_id>/cancel", methods=["POST"])
+@jwt_handler.token_required(role="driver")
+def cancel_ride(ride_id):
+    """Cancel a ride by driver"""
+    try:
+        conn = DatabaseConnector.get_connection()
+        cursor = conn.cursor()
+        
+        # Verify the ride exists and belongs to this driver
+        cursor.execute("""
+            SELECT r.RideID, r.StatusID, rs.Name as Status
+            FROM Rides r
+            JOIN RideStatus rs ON r.StatusID = rs.StatusID
+            WHERE r.RideID = ? AND r.DriverID = ?
+        """, (ride_id, g.user_id))
+        
+        ride = cursor.fetchone()
+        if not ride:
+            return jsonify({"error": "Ride not found or not assigned to you"}), 404
+            
+        if ride[2] not in ['accepted', 'in_progress']:
+            return jsonify({"error": "Only accepted or in-progress rides can be cancelled"}), 400
+            
+        # Update ride status to cancelled
+        cursor.execute("""
+            UPDATE Rides 
+            SET StatusID = (SELECT StatusID FROM RideStatus WHERE Name = 'cancelled'),
+                CancellationReason = ?,
+                CancellationTime = CURRENT_TIMESTAMP
+            WHERE RideID = ?
+        """, ('Cancelled by driver', ride_id))
+        
+        # Update driver status to available
+        cursor.execute("""
+            UPDATE Driver 
+            SET StatusID = (SELECT StatusID FROM DriverStatus WHERE Name = 'available')
+            WHERE UserID = ?
+        """, (g.user_id,))
+        
+        conn.commit()
+        return jsonify({"message": "Ride cancelled successfully"}), 200
+        
+    except Exception as e:
+        if 'conn' in locals():
+            conn.rollback()
         return jsonify({"error": str(e)}), 500
     finally:
         if 'conn' in locals():
