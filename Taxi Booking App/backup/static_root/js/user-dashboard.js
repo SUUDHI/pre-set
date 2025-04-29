@@ -1,5 +1,148 @@
 let currentRideId = null;
 let selectedReason = '';
+let map = null;
+let tracker = null;
+
+// Initialize map and tracker
+function initializeMap() {
+    if (!map) {  // Only initialize if map doesn't exist
+        console.log('Initializing map...');
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic3V1ZGhpIiwiYSI6ImNtOWs0cW9vMDBpdmwybXM2c21ramNmZTQifQ.xsTF7EaOpYKwX4VaVMNgCQ';
+        map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [0, 0],
+            zoom: 2
+        });
+
+        // Add navigation controls
+        map.addControl(new mapboxgl.NavigationControl());
+
+        // Handle map clicks for booking
+        map.on('click', (e) => {
+            const lngLat = e.lngLat;
+            const pickupLat = document.getElementById('pickupLat');
+            const pickupLon = document.getElementById('pickupLon');
+            const dropoffLat = document.getElementById('dropoffLat');
+            const dropoffLon = document.getElementById('dropoffLon');
+
+            if (pickupLat && pickupLon && dropoffLat && dropoffLon) {
+                if (!pickupLat.value || !pickupLon.value) {
+                    pickupLat.value = lngLat.lat.toFixed(6);
+                    pickupLon.value = lngLat.lng.toFixed(6);
+                } else {
+                    dropoffLat.value = lngLat.lat.toFixed(6);
+                    dropoffLon.value = lngLat.lng.toFixed(6);
+                }
+            }
+        });
+
+        // Initialize driver tracker after map is loaded
+        map.on('load', () => {
+            console.log('Map loaded, initializing tracker');
+            tracker = new DriverTracker(map, localStorage.getItem('token'));
+            tracker.connect();
+            checkActiveRide();
+        });
+    }
+}
+
+// Check for active ride
+async function checkActiveRide() {
+    try {
+        console.log('Checking for active ride...');
+        const response = await fetch('/ride/active', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Active ride data:', data);
+        
+        if (data.ride) {
+            currentRideId = data.ride.RideID;
+            updateRideStatus(data.ride);
+            if (tracker && map.loaded()) {
+                console.log('Starting ride tracking with coordinates:', {
+                    pickup: [data.ride.PickupLon, data.ride.PickupLat],
+                    dropoff: [data.ride.DropoffLon, data.ride.DropoffLat]
+                });
+                
+                // Create a ride details object in the format expected by the tracker
+                const rideDetails = {
+                    pickup_lat: parseFloat(data.ride.PickupLat),
+                    pickup_lon: parseFloat(data.ride.PickupLon),
+                    dropoff_lat: parseFloat(data.ride.DropoffLat),
+                    dropoff_lon: parseFloat(data.ride.DropoffLon)
+                };
+
+                // Make sure we have valid coordinates
+                if (isNaN(rideDetails.pickup_lat) || isNaN(rideDetails.pickup_lon) ||
+                    isNaN(rideDetails.dropoff_lat) || isNaN(rideDetails.dropoff_lon)) {
+                    console.error('Invalid coordinates in ride data:', rideDetails);
+                    return;
+                }
+
+                console.log('Showing ride locations with details:', rideDetails);
+                tracker.startTracking(currentRideId);
+                tracker.showRideLocations(rideDetails);
+            } else {
+                console.log('Tracker not initialized or map not loaded yet');
+                // If map is not loaded, wait and try again
+                if (!map.loaded()) {
+                    map.once('load', () => checkActiveRide());
+                }
+            }
+        } else {
+            console.log('No active ride found');
+            if (tracker) {
+                tracker.stopTracking();
+            }
+        }
+    } catch (error) {
+        console.error('Error checking active ride:', error);
+    }
+}
+
+// Update ride status display
+function updateRideStatus(ride) {
+    try {
+        const statusElement = document.getElementById('ride-status');
+        const driverInfoElement = document.getElementById('driver-info');
+        const etaInfoElement = document.getElementById('eta-info');
+
+        if (!statusElement || !driverInfoElement || !etaInfoElement) {
+            console.error('Status display elements not found');
+            return;
+        }
+
+        if (ride) {
+            console.log('Updating ride status display:', ride);
+            statusElement.textContent = `Status: ${ride.Status || 'Unknown'}`;
+            if (ride.DriverName) {
+                driverInfoElement.textContent = `Driver: ${ride.DriverName} (${ride.DriverPhone || 'No phone'})`;
+            } else {
+                driverInfoElement.textContent = 'Waiting for driver...';
+            }
+            if (ride.ETA) {
+                etaInfoElement.textContent = `ETA: ${ride.ETA}`;
+            } else {
+                etaInfoElement.textContent = '';
+            }
+        } else {
+            statusElement.textContent = 'No active ride';
+            driverInfoElement.textContent = '';
+            etaInfoElement.textContent = '';
+        }
+    } catch (error) {
+        console.error('Error updating ride status:', error);
+    }
+}
 
 // Format currency
 function formatCurrency(amount) {
@@ -294,46 +437,66 @@ function logout() {
     window.location.href = '/';
 }
 
-// Initialize the page
+// Initialize everything when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    loadUserEmail();
+    initializeMap();
     loadRideHistory();
+    loadUserEmail();
     loadVehicleTypes();
     
     // Handle booking form submission
-    document.getElementById('bookingForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = {
-            pickup_lat: document.getElementById('pickupLat').value,
-            pickup_lon: document.getElementById('pickupLon').value,
-            dropoff_lat: document.getElementById('dropoffLat').value,
-            dropoff_lon: document.getElementById('dropoffLon').value,
-            vehicle_type_id: document.getElementById('vehicleType').value,
-            pickup_time: document.getElementById('pickupTime').value || null
-        };
+    const bookingForm = document.getElementById('bookingForm');
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = {
+                pickup_lat: document.getElementById('pickupLat').value,
+                pickup_lon: document.getElementById('pickupLon').value,
+                dropoff_lat: document.getElementById('dropoffLat').value,
+                dropoff_lon: document.getElementById('dropoffLon').value,
+                vehicle_type_id: document.getElementById('vehicleType').value,
+                pickup_time: document.getElementById('pickupTime').value || null
+            };
 
-        try {
-            const response = await fetch('/ride/request', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify(formData)
-            });
-            const data = await response.json();
-            if (response.ok) {
-                alert('Ride booked successfully!');
-                loadRideHistory();
-            } else {
-                alert(data.error || 'Failed to book ride');
+            try {
+                const response = await fetch('/ride/request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    alert('Ride booked successfully!');
+                    // Clear form fields
+                    document.getElementById('pickupLat').value = '';
+                    document.getElementById('pickupLon').value = '';
+                    document.getElementById('dropoffLat').value = '';
+                    document.getElementById('dropoffLon').value = '';
+                    document.getElementById('pickupTime').value = '';
+                    // Reset vehicle type to first option
+                    const vehicleTypeSelect = document.getElementById('vehicleType');
+                    if (vehicleTypeSelect.options.length > 0) {
+                        vehicleTypeSelect.selectedIndex = 0;
+                    }
+                    // Refresh ride history and check active ride
+                    loadRideHistory();
+                    checkActiveRide();
+                } else {
+                    alert(data.error || 'Failed to book ride');
+                }
+            } catch (error) {
+                console.error('Error booking ride:', error);
+                alert('Failed to book ride');
             }
-        } catch (error) {
-            console.error('Error booking ride:', error);
-            alert('Failed to book ride');
-        }
-    });
-});
+        });
+    }
 
-// Refresh ride history every 30 seconds
-setInterval(loadRideHistory, 30000); 
+    // Check for active ride every 30 seconds
+    setInterval(checkActiveRide, 30000);
+    
+    // Refresh ride history every 30 seconds
+    setInterval(loadRideHistory, 30000);
+}); 

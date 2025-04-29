@@ -10,8 +10,8 @@ class TaxiApp:
     def __init__(self):
         self.app = Flask(__name__, 
                         template_folder='../templates',
-                        static_folder='../static',
-                        static_url_path='')
+                        static_folder='static',
+                        static_url_path='/static')
         self.app.config["JSON_SORT_KEYS"] = False
         self.app.config['SECRET_KEY'] = 'your-secret-key'
         

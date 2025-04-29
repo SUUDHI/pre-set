@@ -1,6 +1,7 @@
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from utils.jwt_handler import jwt_handler
 import json
+from db_operations.ride_ops import get_ride_by_id
 
 socketio = SocketIO()
 
@@ -45,6 +46,42 @@ def handle_leave_ride(data):
         if ride_id:
             leave_room(f'ride_{ride_id}')
             emit('left_ride', {'message': f'Left ride room {ride_id}'})
+    except Exception as e:
+        emit('error', {'message': str(e)})
+
+@socketio.on('get_ride_details')
+def handle_get_ride_details(data):
+    try:
+        # Verify JWT token
+        token = data.get('token')
+        if not token:
+            emit('error', {'message': 'Authentication required'})
+            return
+
+        user_data = jwt_handler.verify_token(token)
+        if not user_data:
+            emit('error', {'message': 'Invalid token'})
+            return
+
+        ride_id = data.get('ride_id')
+        if not ride_id:
+            emit('error', {'message': 'Ride ID required'})
+            return
+
+        # Get ride details from database
+        ride = get_ride_by_id(ride_id)
+        if not ride:
+            emit('error', {'message': 'Ride not found'})
+            return
+
+        # Send ride details to the client
+        emit('ride_details', {
+            'pickup_lat': ride['PickupLat'],
+            'pickup_lon': ride['PickupLon'],
+            'dropoff_lat': ride['DropoffLat'],
+            'dropoff_lon': ride['DropoffLon']
+        })
+
     except Exception as e:
         emit('error', {'message': str(e)})
 

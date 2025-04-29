@@ -102,16 +102,16 @@ class DriverService:
 
             # Generate token using the new jwt_handler
             payload = {
-                "user_id": driver["DriverID"],
+                "user_id": driver["UserID"],
                 "role": "driver"
             }
             token = jwt_handler.generate_token(payload)
             return {"token": token, "driver": {
-                "id": driver["DriverID"],
+                "id": driver["UserID"],
                 "name": driver["Name"],
                 "email": driver["Email"],
                 "license_plate": driver["LicensePlate"],
-                "vehicle_type": driver["VehicleType"]
+                "vehicle_type": driver["VehicleTypeID"]
             }}, 200
 
         except Exception as e:

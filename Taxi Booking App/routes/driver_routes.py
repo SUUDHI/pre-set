@@ -5,6 +5,7 @@ from utils.jwt_handler import jwt_handler
 from db.connect_db import DatabaseConnector
 from utils.auth import token_required
 from db_operations.driver_ops import DriverOps
+import sqlite3
 
 driver_bp = Blueprint("driver", __name__)
 driver_service = DriverService()
@@ -33,81 +34,101 @@ def login_driver():
     response, status = driver_service.login_driver(email, password)
     return jsonify(response), status
 
-@driver_bp.route("/location", methods=["PUT"])
+@driver_bp.route("/location", methods=["POST", "PUT"])
 @jwt_handler.token_required(role="driver")
 def update_driver_location():
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Invalid JSON format"}), 400
-
-    latitude = data.get("latitude")
-    longitude = data.get("longitude")
-
-    if latitude is None or longitude is None:
-        return jsonify({"error": "Latitude and longitude are required"}), 400
-
-    response, status = driver_service.update_location(g.user_id, latitude, longitude)
-    return jsonify(response), status
-
-@driver_bp.route("/status", methods=["GET"])
-@jwt_handler.token_required(role="driver")
-def get_driver_status():
+    """Update driver's current location"""
     try:
-        driver_id = g.user_id
-        if not driver_id:
-            return jsonify({'error': 'Invalid driver credentials'}), 401
-            
-        status = driver_ops.get_driver_status(driver_id)
-        
-        if status is None:
-            return jsonify({'error': 'Driver not found'}), 404
-            
-        return jsonify({
-            'status': status,
-            'driver_id': driver_id
-        })
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+
+        if latitude is None or longitude is None:
+            return jsonify({"error": "Latitude and longitude are required"}), 400
+
+        conn = DatabaseConnector.get_connection()
+        cursor = conn.cursor()
+
+        # Update driver's location in the database
+        cursor.execute("""
+            UPDATE Driver 
+            SET Latitude = ?, Longitude = ?, LastLocationUpdate = CURRENT_TIMESTAMP
+            WHERE UserID = ?
+        """, (latitude, longitude, g.user_id))
+
+        conn.commit()
+        return jsonify({"message": "Location updated successfully"}), 200
+
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"Error updating location: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
 
-@driver_bp.route("/status", methods=["PUT"])
+@driver_bp.route("/status", methods=["GET", "POST", "PUT"])
 @jwt_handler.token_required(role="driver")
-def update_driver_status():
+def handle_driver_status():
+    """Handle all driver status operations"""
     try:
-        driver_id = g.user_id
-        if not driver_id:
-            return jsonify({'error': 'Invalid driver credentials'}), 401
-            
+        if request.method == "GET":
+            status = driver_ops.get_driver_status(g.user_id)
+            if status is None:
+                return jsonify({'error': 'Driver not found'}), 404
+            return jsonify({'status': status, 'driver_id': g.user_id})
+
+        # POST or PUT
         data = request.get_json()
         if not data or 'status' not in data:
-            return jsonify({'error': 'Status is required'}), 400
-            
-        new_status = data['status'].upper()
-        valid_statuses = ['AVAILABLE', 'BUSY', 'OFFLINE']
+            return jsonify({"error": "Status is required"}), 400
+
+        status = data['status'].lower()
+        valid_statuses = ['available', 'busy', 'offline']
         
-        if new_status not in valid_statuses:
+        if status not in valid_statuses:
             return jsonify({'error': f'Invalid status. Must be one of: {", ".join(valid_statuses)}'}), 400
 
-        driver_ops.update_driver_status(driver_id, new_status)
-        
+        conn = DatabaseConnector.get_connection()
+        cursor = conn.cursor()
+
+        # Map status to StatusID
+        status_map = {
+            'offline': 1,
+            'available': 2,
+            'busy': 3
+        }
+
+        # Update driver's status
+        cursor.execute("""
+            UPDATE Driver 
+            SET StatusID = ?, LastStatusUpdate = CURRENT_TIMESTAMP
+            WHERE UserID = ?
+        """, (status_map[status], g.user_id))
+
+        conn.commit()
         return jsonify({
             'message': 'Status updated successfully',
-            'status': new_status,
-            'driver_id': driver_id
+            'status': status,
+            'driver_id': g.user_id
         })
+
     except Exception as e:
+        print(f"Error handling driver status: {str(e)}")
         return jsonify({'error': str(e)}), 500
+    finally:
+        if 'conn' in locals():
+            conn.close()
 
 @driver_bp.route("/rides/<int:ride_id>/accept", methods=["POST"])
 @jwt_handler.token_required(role="driver")
 def accept_ride(ride_id):
     """Accept a ride request by a driver"""
     try:
-        # Get driver ID from the token
-        driver_id = g.user_id
-        
-        response, status = driver_service.accept_ride(driver_id, ride_id)
+        response, status = driver_service.accept_ride(g.user_id, ride_id)
         return jsonify(response), status
-        
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -155,4 +176,5 @@ def get_vehicle_types():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
-        conn.close()
+        if 'conn' in locals():
+            conn.close()

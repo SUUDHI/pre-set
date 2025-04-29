@@ -167,3 +167,56 @@ def get_ride_eta(ride_id):
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@ride_bp.route('/active', methods=['GET'])
+@jwt_handler.token_required()
+def get_active_ride():
+    """Get the user's active ride"""
+    try:
+        conn = DatabaseConnector.get_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        # Get active ride with proper joins and error handling
+        cursor.execute("""
+            SELECT 
+                r.RideID,
+                r.UserID,
+                r.PickupLat,
+                r.PickupLon,
+                r.DropoffLat,
+                r.DropoffLon,
+                r.Fare,
+                r.DriverID,
+                rs.Name as Status,
+                r.RequestedAt,
+                r.PickupTime,
+                u.Name as DriverName,
+                u.Phone as DriverPhone,
+                vt.Name as VehicleType
+            FROM Rides r
+            JOIN RideStatus rs ON r.StatusID = rs.StatusID
+            LEFT JOIN Users u ON r.DriverID = u.UserID
+            LEFT JOIN VehicleTypes vt ON r.VehicleTypeID = vt.VehicleTypeID
+            WHERE r.UserID = ? 
+            AND rs.Name IN ('requested', 'accepted', 'in_progress')
+            ORDER BY r.RequestedAt DESC
+            LIMIT 1
+        """, (g.user_id,))
+        
+        ride = cursor.fetchone()
+        
+        if ride:
+            ride_dict = dict(ride)
+            print(f"Found active ride: {ride_dict}")  # Debug log
+            return jsonify({"ride": ride_dict})
+        
+        print("No active ride found")  # Debug log
+        return jsonify({"ride": None})
+        
+    except Exception as e:
+        print(f"Error in get_active_ride: {str(e)}")  # Debug log
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
