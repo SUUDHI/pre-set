@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 from flask import Flask, render_template
 from flask_cors import CORS
 from routes.auth_routes import auth_bp
@@ -13,7 +15,7 @@ class TaxiApp:
                         static_folder='static',
                         static_url_path='/static')
         self.app.config["JSON_SORT_KEYS"] = False
-        self.app.config['SECRET_KEY'] = 'your-secret-key'
+        self.app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'your-secure-secret-key-here')
         
         # Simple CORS configuration
         CORS(self.app)
