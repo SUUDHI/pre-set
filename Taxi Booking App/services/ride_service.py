@@ -80,8 +80,22 @@ class RideService:
             dict: Ride details including fare and ETA
         """
         try:
+            import sqlite3
+            conn = sqlite3.connect('instance/Taxi_database.db')
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            # 1. Fetch last cancelled ride with a fee
+            cursor.execute('''
+                SELECT RideID, CancellationFee FROM Rides
+                WHERE UserID = ? AND StatusID = (SELECT StatusID FROM RideStatus WHERE Name = 'cancelled') AND CancellationFee > 0
+                ORDER BY RequestedAt DESC LIMIT 1
+            ''', (user_id,))
+            row = cursor.fetchone()
+            cancellation_fee = row['CancellationFee'] if row else 0
+            last_cancelled_ride_id = row['RideID'] if row else None
+
             # Calculate fare
-            fare = self.fare_calculator.calculate_fare(pickup, dropoff, vehicle_type_id)
+            fare = self.fare_calculator.calculate_fare(pickup, dropoff, vehicle_type_id) + cancellation_fee
             
             # Calculate ETA
             distance_km = self.fare_calculator.distance_calculator.calculate_distance(pickup, dropoff)
@@ -103,6 +117,12 @@ class RideService:
             
             ride_id = self.ride_repository.save_ride(ride_data)
             
+            # 3. After booking new ride, set old fee to 0
+            if last_cancelled_ride_id:
+                cursor.execute("UPDATE Rides SET CancellationFee = 0 WHERE RideID = ?", (last_cancelled_ride_id,))
+                conn.commit()
+            conn.close()
+
             return {
                 "ride_id": ride_id,
                 "fare": fare,

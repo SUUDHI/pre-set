@@ -55,7 +55,7 @@ def update_driver_location():
         # Update driver's location in the database
         cursor.execute("""
             UPDATE Driver 
-            SET Latitude = ?, Longitude = ?, LastLocationUpdate = CURRENT_TIMESTAMP
+            SET Latitude = ?, Longitude = ?
             WHERE UserID = ?
         """, (latitude, longitude, g.user_id))
 
@@ -104,7 +104,7 @@ def handle_driver_status():
         # Update driver's status
         cursor.execute("""
             UPDATE Driver 
-            SET StatusID = ?, LastStatusUpdate = CURRENT_TIMESTAMP
+            SET StatusID = ?
             WHERE UserID = ?
         """, (status_map[status], g.user_id))
 
@@ -307,8 +307,7 @@ def cancel_ride(ride_id):
         cursor.execute("""
             UPDATE Rides 
             SET StatusID = (SELECT StatusID FROM RideStatus WHERE Name = 'cancelled'),
-                CancellationReason = ?,
-                CancellationTime = CURRENT_TIMESTAMP
+                CancellationReason = ?
             WHERE RideID = ?
         """, ('Cancelled by driver', ride_id))
         

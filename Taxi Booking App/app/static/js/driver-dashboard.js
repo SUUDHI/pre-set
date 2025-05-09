@@ -465,4 +465,27 @@ async function startRide(rideId) {
         console.error('Error starting ride:', error);
         showNotification(error.message, 'error');
     }
+}
+
+// Add updateDriverStatus function
+async function updateDriverStatus(status) {
+    try {
+        const response = await fetch('/driver/status', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ status })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to update driver status');
+        }
+        // Optionally refresh the status in the UI
+        await loadDriverStatus();
+    } catch (error) {
+        console.error('Error updating driver status:', error);
+        showNotification(error.message, 'error');
+    }
 } 

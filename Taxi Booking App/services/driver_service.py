@@ -176,10 +176,14 @@ class DriverService:
 
     def get_requested_rides(self, driver_id: int) -> Tuple[List[Dict[str, Any]], int]:
         try:
-            # Get driver's vehicle type
+            # Get driver's info
             driver = driver_ops.get_driver_by_id(driver_id)
             if not driver:
                 return {"error": "Driver not found"}, 404
+
+            # Only show ride requests if driver is available
+            if driver['StatusName'].lower() != 'available':
+                return [], 200
 
             # Get ride requests matching the driver's vehicle type
             rides = driver_ops.get_ride_requests_by_vehicle_type(driver_id, driver['VehicleTypeID'])
