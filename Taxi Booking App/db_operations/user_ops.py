@@ -113,21 +113,21 @@ def get_user_by_id(user_id):
     finally:
         conn.close()
 
-def get_driver_details(user_id):
-    conn = DatabaseConnector.get_connection()
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    try:
-        cursor.execute(
-            """
-            SELECT d.*, ds.Name as Status
-            FROM Driver d
-            LEFT JOIN DriverStatus ds ON d.StatusID = ds.StatusID
-            WHERE d.UserID = ?
-            """,
-            (user_id,)
-        )
-        driver = cursor.fetchone()
-        return dict(driver) if driver else None
-    finally:
-        conn.close()
+# def get_driver_details(user_id):
+#     conn = DatabaseConnector.get_connection()
+#     conn.row_factory = sqlite3.Row
+#     cursor = conn.cursor()
+#     try:
+#         cursor.execute(
+#             """
+#             SELECT d.*, ds.Name as Status
+#             FROM Driver d
+#             LEFT JOIN DriverStatus ds ON d.StatusID = ds.StatusID
+#             WHERE d.UserID = ?
+#             """,
+#             (user_id,)
+#         )
+#         driver = cursor.fetchone()
+#         return dict(driver) if driver else None
+#     finally:
+#         conn.close()

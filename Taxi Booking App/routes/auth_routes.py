@@ -1,6 +1,5 @@
 # routes/auth_routes.py
-
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, jsonify
 from services.auth_service import AuthService
 from services.driver_service import DriverService
 from services.validators import UserValidator

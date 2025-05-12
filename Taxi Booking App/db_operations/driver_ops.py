@@ -126,25 +126,25 @@ def get_driver_by_license_plate(license_plate):
         conn.close()
 
 
-def get_driver_by_credentials(email, password):
-    conn = DatabaseConnector.get_connection()
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    try:
-        cursor.execute(
-            """
-            SELECT u.*, d.*, r.Name as Role 
-            FROM Users u
-            JOIN Driver d ON u.UserID = d.UserID
-            JOIN Role r ON u.RoleID = r.RoleID
-            WHERE u.Email = ?
-            """,
-            (email,)
-        )
-        driver = cursor.fetchone()
-        return dict(driver) if driver else None
-    finally:
-        conn.close()
+# def get_driver_by_credentials(email, password):
+#     conn = DatabaseConnector.get_connection()
+#     conn.row_factory = sqlite3.Row
+#     cursor = conn.cursor()
+#     try:
+#         cursor.execute(
+#             """
+#             SELECT u.*, d.*, r.Name as Role 
+#             FROM Users u
+#             JOIN Driver d ON u.UserID = d.UserID
+#             JOIN Role r ON u.RoleID = r.RoleID
+#             WHERE u.Email = ?
+#             """,
+#             (email,)
+#         )
+#         driver = cursor.fetchone()
+#         return dict(driver) if driver else None
+#     finally:
+#         conn.close()
 
 
 def update_driver_location(driver_id, latitude, longitude):
@@ -196,25 +196,25 @@ def update_driver_status(driver_id, status_name):
         conn.close()
 
 
-def get_available_drivers():
-    conn = DatabaseConnector.get_connection()
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    try:
-        cursor.execute(
-            """
-            SELECT u.*, d.*, r.Name as Role, ds.Name as Status
-            FROM Users u
-            JOIN Driver d ON u.UserID = d.UserID
-            JOIN Role r ON u.RoleID = r.RoleID
-            JOIN DriverStatus ds ON d.StatusID = ds.StatusID
-            WHERE ds.Name = 'available'
-            """
-        )
-        drivers = cursor.fetchall()
-        return [dict(driver) for driver in drivers]
-    finally:
-        conn.close()
+# def get_available_drivers():
+#     conn = DatabaseConnector.get_connection()
+#     conn.row_factory = sqlite3.Row
+#     cursor = conn.cursor()
+#     try:
+#         cursor.execute(
+#             """
+#             SELECT u.*, d.*, r.Name as Role, ds.Name as Status
+#             FROM Users u
+#             JOIN Driver d ON u.UserID = d.UserID
+#             JOIN Role r ON u.RoleID = r.RoleID
+#             JOIN DriverStatus ds ON d.StatusID = ds.StatusID
+#             WHERE ds.Name = 'available'
+#             """
+#         )
+#         drivers = cursor.fetchall()
+#         return [dict(driver) for driver in drivers]
+#     finally:
+#         conn.close()
 
 
 def get_driver_by_id(driver_id: int) -> dict:

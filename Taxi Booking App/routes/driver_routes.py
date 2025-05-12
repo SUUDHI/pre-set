@@ -12,27 +12,27 @@ driver_service = DriverService()
 driver_validator = DriverValidator()
 driver_ops = DriverOps()
 
-@driver_bp.route("/register", methods=["POST"])
-def register_driver():
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Invalid JSON format"}), 400
+# @driver_bp.route("/register", methods=["POST"])
+# def register_driver():
+#     data = request.get_json()
+#     if not data:
+#         return jsonify({"error": "Invalid JSON format"}), 400
 
-    is_valid, message = driver_validator.validate(data)
-    if not is_valid:
-        return jsonify({"error": message}), 400
+#     is_valid, message = driver_validator.validate(data)
+#     if not is_valid:
+#         return jsonify({"error": message}), 400
 
-    response, status = driver_service.register_driver(data)
-    return jsonify(response), status
+#     response, status = driver_service.register_driver(data)
+#     return jsonify(response), status
 
-@driver_bp.route("/login", methods=["POST"])
-def login_driver():
-    data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
+# @driver_bp.route("/login", methods=["POST"])
+# def login_driver():
+#     data = request.get_json()
+#     email = data.get("email")
+#     password = data.get("password")
 
-    response, status = driver_service.login_driver(email, password)
-    return jsonify(response), status
+#     response, status = driver_service.login_driver(email, password)
+#     return jsonify(response), status
 
 @driver_bp.route("/location", methods=["POST", "PUT"])
 @jwt_handler.token_required(role="driver")

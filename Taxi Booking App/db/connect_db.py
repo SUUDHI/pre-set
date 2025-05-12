@@ -36,23 +36,23 @@ class DatabaseConnector:
             print(f"Database connection error: {str(e)}")
             raise
 
-    @classmethod
-    def execute_query(cls, query, params=None):
-        conn = None
-        try:
-            conn = cls.get_connection()
-            cursor = conn.cursor()
-            if params:
-                cursor.execute(query, params)
-            else:
-                cursor.execute(query)
-            conn.commit()
-            return cursor
-        except sqlite3.Error as e:
-            if conn:
-                conn.rollback()
-            print(f"Query execution error: {str(e)}")
-            raise
-        finally:
-            if conn:
-                conn.close()
+    # @classmethod
+    # def execute_query(cls, query, params=None):
+    #     conn = None
+    #     try:
+    #         conn = cls.get_connection()
+    #         cursor = conn.cursor()
+    #         if params:
+    #             cursor.execute(query, params)
+    #         else:
+    #             cursor.execute(query)
+    #         conn.commit()
+    #         return cursor
+    #     except sqlite3.Error as e:
+    #         if conn:
+    #             conn.rollback()
+    #         print(f"Query execution error: {str(e)}")
+    #         raise
+    #     finally:
+    #         if conn:
+    #             conn.close()
