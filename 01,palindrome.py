@@ -1,44 +1,45 @@
-n1 = 6789
+num = 6789
 rrev = 0
-def is_palindrome(n1):
-    n2 = n1
+num2 = 121
+
+def is_palindrome(num):
+    copy_num = num
     rev = 0
-    while n1 > 0:
-        digit = n1 % 10
+    while num > 0:
+        digit = num % 10
         rev = rev * 10 + digit
-        n1 //= 10
-    if n2 == rev:
+        num //= 10
+    if copy_num == rev:
         return True,rev
     else:
         return False
-n2 = 121
-#print(is_palindrome(n2))
 
+def is_palindrome_2(num):
+    if (num2 < 0):
+        return False
+    copy_num = num2   
+    #print(copy_num) 
+    rev = 0
+    while copy_num > 0:
+        digit = copy_num % 10
+        rev = rev * 10 + digit
+        copy_num //= 10
+    #print(rev)
+    if num2 == rev:
+        return True
+    else:
+        return False
 
-if (n2 < 0):
-    print("False")
-k = n2   
-print(k) 
-rev = 0
-while k > 0:
-    digit = k % 10
-    rev = rev * 10 + digit
-    k //= 10
-print(rev)
-if n2 == rev:
-    print("True")
-else:
-    print("False")
+def is_palindrome_3(num):
+    num_str = str(num)
 
+    reverse_str = num_str[::-1]
+    #print(num_str)
 
-# n3 = str(n2)
+    if reverse_str == num_str:
+        return True
+    else:
+        return False
 
-# n4 = n3[::-1]
-# print(n3)
-
-# if n4 == n3:
-#     print(True)
-# else:
-#     print(False)
-
-
+print(is_palindrome_2(num2))
+print(is_palindrome_3(num2))
