@@ -15,9 +15,9 @@ haystack = "butsad"
 needle = "sad"
 
 def remove_first(haystack, needle):
-    for i in range(len(haystack)):
-        if haystack[i] == needle[0] and haystack[i+1] == needle[1] and haystack[i+2] == needle[2]:
-            return i
+    for index in range(len(haystack)):
+        if haystack[index] == needle[0] and haystack[index+1] == needle[1] and haystack[index+2] == needle[2]:
+            return index
         
     return -1
 
@@ -35,12 +35,12 @@ def remove_first02(str,rem):
     if str == rem:
         return 0
 
-    n = len(str)
+    length_str = len(str)
     left = 0
     right = len(rem)
     index = 0
 
-    while(left < n and right < n + 1):
+    while(left < length_str and right < length_str + 1):
         sub = str[left : right]
         if sub == rem:
             return index
