@@ -23,16 +23,16 @@ def Target_sum(nums, target):
                 return [nums[i], nums[j]]
             
  # using single loop,   
-def target_1(nums, target):
+def Target_sum_2(nums, target):
     for i in range(len(nums)):
-        t = target - nums[i]
-        if t in nums:
-            return [nums[i], t]
+        diff = target - nums[i]
+        if diff in nums:
+            return [nums[i], diff]
 
 nums = [1,4,6,8]
 target = 5
 
-print(target_1(nums,target))
+print(Target_sum_2(nums,target))
 
 print(Target_sum(nums,target))
 
@@ -42,11 +42,11 @@ def two_sun(nums,target):
 
     for i in range(len(nums)):
         num = nums[i]
-        c = target - nums[i]
+        diff = target - nums[i]
         
         if num in complement:
             return [complement[num], i]
         else:
-            complement[c] = i
+            complement[diff] = i
 
 print(two_sun(nums, target)) 
