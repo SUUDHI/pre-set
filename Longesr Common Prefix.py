@@ -5,19 +5,19 @@ Output: "fl"""
 strs = ["flower","flow","flight"]
 
 #Total Time Complexity: O(n * m)
-def long(strs):
-    lon = ""
+def  longestCommonPrefix_1(strs):
+    CommonPrefix = ""
 
-    for i in range(len(strs[0])):
+    for char in range(len(strs[0])):
         for s in strs:
-            if i == len(s) or s[i] != strs[0][i]:
-                return lon
+            if char == len(s) or s[char] != strs[0][char]:
+                return CommonPrefix
 
-        lon += strs[0][i]
-    return lon
+        CommonPrefix += strs[0][char]
+    return CommonPrefix
 
  #Total Time Complexity: O(n * m²)       
-def longestCommonPrefix(strs):
+def longestCommonPrefix_2(strs):
         if not strs:
             return ""
         prefix = strs[0]
@@ -28,5 +28,5 @@ def longestCommonPrefix(strs):
                     return ""
         return prefix
 
-print(long(strs))
-print(longestCommonPrefix(strs))
+print( longestCommonPrefix_1(strs))
+print(longestCommonPrefix_2(strs))
