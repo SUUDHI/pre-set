@@ -15,9 +15,23 @@ Input: s = "luffy is still joyboy"
 Output: 6
 Explanation: The last word is "joyboy" with length 6."""
 
-def last(s):
-    k = s.split()
-    z = k[-1]
-    return len(z)
+def length_of_last_word(sentance):
+    split_string = sentance.split()
+    last_word = split_string[-1]
+    return len(last_word)
 
-s = "luffy is still joyboy"
+
+def length_Of_Last_Word_2(sentence):
+    words = sentence.strip().split(" ")
+    last_word = words[-1]
+    return len(last_word)
+
+
+sentance = "luffy is still joyboy"
+sentance1 = "   fly me   to   the moon  "
+
+print(length_of_last_word(sentance))
+print(length_of_last_word(sentance1))
+
+print(length_Of_Last_Word_2(sentance))
+print(length_Of_Last_Word_2(sentance1))

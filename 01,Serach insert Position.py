@@ -17,42 +17,42 @@ Input: nums = [1,3,5,6], target = 7
 Output: 4
 
 """
-def target(nums,t):
-    k = len(nums)
-    for i in range(len(nums)):
-        if t - nums[i] == 0:
-            return i
-        elif t - nums[i] == -1:
-            return i
+def find_insert_position(nums,target):
+    length_of_nums = len(nums)
+    for item in range(len(nums)):
+        if target - nums[item] == 0:
+            return item
+        elif target - nums[item] == -1:
+            return item
     else:
-        return k
+        return length_of_nums
 
 
-def target2(nums,t):
-    for i in range(len(nums)):
-        if nums[i] >= t:
-            return i
+def find_insert_position_2(nums,target):
+    for item in range(len(nums)):
+        if nums[item] >= target:
+            return item
     return len(nums)
 
 
-def target3(nums,t):
-    l = 0
-    r = len(nums) - 1
+def find_insert_position_3(nums,target):
+    left = 0
+    right = len(nums) - 1
     
-    while l <= r:
-        mid = (l + r) // 2
+    while left <= right:
+        mid = (left + right) // 2
         
-        if t == nums[mid]:
+        if target == nums[mid]:
             return mid
-        if t >= nums[mid]:
-            l = mid + 1
+        if target >= nums[mid]:
+            left = mid + 1
         else:
-            r = mid - 1
+            right = mid - 1
 
-    return l 
+    return left 
 
 nums = [1,3,5,6]
-t = 7
+target = 7
 
-print(target(nums,t))
-print(target3(nums,t))
+print(find_insert_position(nums,target))
+print(find_insert_position_3(nums,target))
