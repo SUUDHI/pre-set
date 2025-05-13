@@ -4,7 +4,7 @@
 s = "()[]{}"
 
 def is_valid_Parentheses(str):
-    p_dict = {
+    Parentheses_dict = {
         ")" : "(",
         "]" : "[",
         "}" : "{"
@@ -13,8 +13,8 @@ def is_valid_Parentheses(str):
     stack = []
 
     for char in str:
-        if char in p_dict:
-            if stack and stack[-1] == p_dict[char]:
+        if char in Parentheses_dict:
+            if stack and stack[-1] == Parentheses_dict[char]:
                 stack.pop()
             else:
                 return False
@@ -36,12 +36,12 @@ def isValid(s):
     if arr[0] == '}' or arr[0] == ']' or arr[0] == ')':
         return False
 
-    for i in arr:
-        if i == '{' or i == '[' or i == '(':
-            stack.append(i)
+    for char in arr:
+        if char == '{' or char == '[' or char == '(':
+            stack.append(char)
         elif len(stack) == 0:
             return False
-        elif ord(stack[-1]) == ord(i) - 2 or ord(stack[-1]) == ord(i) - 1:
+        elif ord(stack[-1]) == ord(char) - 2 or ord(stack[-1]) == ord(char) - 1:
             stack.pop()
         else:
             return False
