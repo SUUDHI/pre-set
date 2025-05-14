@@ -21,19 +21,19 @@ def isAnagram2(string1, string2):
 
     return sorted_string1 == sorted_string2
 
-def isAnagram3(s, t):
-    if len(s) != len(t):
+def isAnagram3(string_1, string_2):
+    if len(string_1) != len(string_2):
         return False
     
-    countS = {}
-    countT = {}
+    countString_1 = {}
+    countString_2 = {}
 
-    for i in range(len(s)):
-        countS[s[i]] = 1 + countS.get(s[i], 0)
-        countT[t[i]] = 1 + countT.get(t[i], 0)
+    for char in range(len(string_1)):
+        countString_1[string_1[char]] = 1 + countString_1.get(string_1[char], 0)
+        countString_2[string_2[char]] = 1 + countString_2.get(string_2[char], 0)
 
-    for j in countS:
-        if countS[j] != countT.get(j, 0):
+    for char in countString_1:
+        if countString_1[char] != countString_2.get(char, 0):
             return False
     
     return True
