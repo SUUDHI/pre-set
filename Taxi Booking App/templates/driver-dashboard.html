@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taxi Booking Service - Driver Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Add Socket.IO client library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-taxi"></i>
+            <span>Taxi Booking Service</span>
+        </div>
+        <div class="user-info">
+            <span id="userEmail"></span>
+            <button onclick="logout()" class="btn-secondary">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h2>Update Location</h2>
+            <form id="locationForm" class="form-group">
+                <div class="input-group">
+                    <label for="latitude">Latitude</label>
+                    <input type="number" id="latitude" name="latitude" placeholder="Latitude" step="any" required>
+                    
+                    <label for="longitude">Longitude</label>
+                    <input type="number" id="longitude" name="longitude" placeholder="Longitude" step="any" required>
+                </div>
+                <button type="submit" class="btn-primary">Update Location</button>
+            </form>
+
+            <div class="status-section">
+                <label for="driverStatus">Status:</label>
+                <select id="driverStatus" name="driverStatus" class="form-control">
+                    <option value="offline">Offline</option>
+                    <option value="available">Available</option>
+                    <option value="busy">Busy</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Ride Requests</h2>
+            <div id="requestsTableBody" class="ride-list">
+                <!-- Ride requests will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Load JavaScript files -->
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/tracking.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/driver-dashboard.js') }}"></script>
+    <script>
+        // Initialize Socket.IO connection
+        const socket = io();
+        
+        socket.on('connect', () => {
+            console.log('Connected to WebSocket server');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from WebSocket server');
+        });
+
+        // Initialize location tracking
+        let locationUpdater = null;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            locationUpdater = new DriverLocationUpdater(localStorage.getItem('token'));
+            locationUpdater.connect();
+
+            // Listen for ride status changes
+            socket.on('ride_status_change', (data) => {
+                if (data.status === 'accepted') {
+                    if (locationUpdater) {
+                        locationUpdater.startUpdating(data.ride_id);
+                        console.log('Started location tracking for ride:', data.ride_id);
+                    }
+                } else if (data.status === 'completed' || data.status === 'cancelled') {
+                    if (locationUpdater) {
+                        locationUpdater.stopUpdating();
+                        console.log('Stopped location tracking');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

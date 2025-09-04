@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="sidebar">
+        <h2>Dashboard</h2>
+        <ul>
+            <li><a href="#ride-history">Ride History</a></li>
+            <li><a href="#current-ride">Current Ride</a></li>
+            <li><a href="#profile">Profile</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div id="current-ride" class="section">
+            <h2>Current Ride</h2>
+            <div class="tracking-container">
+                <div class="tracking-info">
+                    <h3>Ride Status</h3>
+                    <p id="ride-status">No active ride</p>
+                    <p id="driver-info"></p>
+                    <p id="eta-info"></p>
+                </div>
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <div id="ride-history" class="section">
+            <h2>Ride History</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Pickup</th>
+                        <th>Dropoff</th>
+                        <th>Fare</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="ridesTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet">
+<script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+<script src="{{ url_for('static', filename='js/tracking.js') }}"></script>
+<script src="{{ url_for('static', filename='js/user-dashboard.js') }}"></script>
+{% endblock %} 

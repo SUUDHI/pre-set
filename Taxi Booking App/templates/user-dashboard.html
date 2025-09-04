@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taxi Booking Service</title>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user-dashboard.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Taxi Booking Service</h1>
+            <button onclick="logout()" class="logout-btn">Logout</button>
+        </header>
+
+        <div class="main-content">
+            <!-- Left Panel -->
+            <div class="booking-panel">
+                <h2>Book a Ride</h2>
+                <form id="bookingForm">
+                    <div class="location-section">
+                        <h3>Pickup Location</h3>
+                        <div class="form-group">
+                            <input type="number" id="pickupLat" placeholder="Latitude" step="any" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" id="pickupLon" placeholder="Longitude" step="any" required>
+                        </div>
+                    </div>
+
+                    <div class="location-section">
+                        <h3>Dropoff Location</h3>
+                        <div class="form-group">
+                            <input type="number" id="dropoffLat" placeholder="Latitude" step="any" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" id="dropoffLon" placeholder="Longitude" step="any" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vehicleType">Vehicle Type</label>
+                        <select id="vehicleType" required></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pickupTime">Pickup Time (leave empty for immediate booking)</label>
+                        <input type="datetime-local" id="pickupTime">
+                    </div>
+
+                    <button type="submit" class="book-btn">Book Now</button>
+                </form>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="map-panel">
+                <h2>Live Tracking</h2>
+                <div id="map"></div>
+                <div class="ride-status">
+                    <p id="ride-status">No active ride</p>
+                    <p id="driver-info"></p>
+                    <p id="eta-info"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Rides Section -->
+        <div class="rides-section">
+            <h2>Recent Rides</h2>
+            <table class="rides-table">
+                <thead>
+                    <tr>
+                        <th>Ride ID</th>
+                        <th>Status</th>
+                        <th>Vehicle Type</th>
+                        <th>Pickup</th>
+                        <th>Dropoff</th>
+                        <th>Fare</th>
+                        <th>Cancellation Fee</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ridesTableBody">
+                    <!-- Ride history will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/tracking.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/user-dashboard.js') }}"></script>
+</body>
+</html> 
